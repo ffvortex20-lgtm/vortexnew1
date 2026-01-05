@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vortex Links • Gerar</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:radial-gradient(circle at top,#6a00ff,#12001f);min-height:100vh;color:#fff}
+.container{max-width:700px;margin:80px auto;background:rgba(0,0,0,.55);border-radius:16px;padding:30px;box-shadow:0 0 30px #9b4dff}
+h1{text-align:center;margin-bottom:20px;color:#d6b3ff;text-shadow:0 0 10px #a855ff}
+.box{background:rgba(20,0,40,.8);border-radius:14px;padding:20px;box-shadow:0 0 15px #7a2bff;text-align:center}
+input{width:100%;padding:14px;border-radius:10px;border:none;margin-bottom:12px;font-size:15px}
+button{width:100%;padding:14px;border-radius:10px;border:none;font-weight:bold;
+background:linear-gradient(45deg,#8f3bff,#c77dff);color:#fff;cursor:pointer;
+box-shadow:0 0 15px #9b4dff;display:none}
+button:hover{filter:brightness(1.15)}
+.footer{text-align:center;margin-top:15px;font-size:14px;color:#e0ccff}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>GERAR LINK</h1>
+
+<div class="box">
+  <input id="link" placeholder="🔗 Link de download (obrigatório)">
+  <input id="canal" placeholder="📢 Link do canal (opcional)">
+  <input id="video" placeholder="🎬 Link do vídeo (YouTube ou MP4)">
+  <input id="creator" placeholder="👤 Nome do criador">
+  <button id="enviar">🚀 Gerar Link</button>
+</div>
+
+<div class="footer">dev: vortex</div>
+</div>
+
+<script>
+function enc(s){
+  return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+const l=link,c=canal,v=video,n=creator,b=enviar;
+l.oninput=()=>b.style.display=l.value.trim()?'block':'none';
+b.onclick=()=>{
+ location.href=`concluir.html#${enc(l.value)}|${enc(c.value||"")}|${enc(v.value||"")}|${enc(n.value||"Vortex")}`;
+};
+</script>
+</body>
+</html>
