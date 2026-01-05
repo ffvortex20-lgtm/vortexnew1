@@ -11,50 +11,34 @@ body{background:radial-gradient(circle at top,#6a00ff,#12001f);min-height:200vh;
 .container{max-width:800px;margin:60px auto;background:rgba(0,0,0,.55);border-radius:16px;padding:30px;box-shadow:0 0 30px #9b4dff}
 h1{text-align:center;margin-bottom:20px;color:#d6b3ff;text-shadow:0 0 10px #a855ff}
 .box{background:rgba(20,0,40,.8);border-radius:14px;padding:20px;box-shadow:0 0 15px #7a2bff;text-align:center}
-
 .videoBox{margin-top:10px;border-radius:12px;overflow:hidden;background:#000}
 .videoBox iframe,.videoBox video{width:100%;height:300px;border:none}
-
 .timer{font-size:18px;margin:15px 0;color:#ffd6ff}
 .result{word-break:break-all;background:#140022;padding:12px;border-radius:10px;border:1px dashed #9b4dff;margin-bottom:15px}
-
-button{
-width:100%;
-padding:14px;
-margin-top:10px;
-border-radius:10px;
-border:none;
-font-size:15px;
-font-weight:bold;
-cursor:pointer;
-color:#fff;
-background:linear-gradient(45deg,#8f3bff,#c77dff);
-box-shadow:0 0 15px #9b4dff;
-display:none
-}
-
+button{width:100%;padding:14px;margin-top:10px;border-radius:10px;border:none;font-size:15px;font-weight:bold;cursor:pointer;color:#fff;background:linear-gradient(45deg,#8f3bff,#c77dff);box-shadow:0 0 15px #9b4dff;display:none}
 .footer{text-align:center;margin-top:15px;font-size:14px;color:#e0ccff}
+.stats{margin-top:8px;font-size:13px;color:#cdb8ff}
+.error{margin-top:10px;color:#ff9aa2;font-size:14px;display:none}
 </style>
 </head>
-
 <body>
 <div class="container">
 <h1>DESBLOQUEANDO LINK</h1>
-
 <div class="box">
   <div class="videoBox" id="videoBox"></div>
   <div class="timer">Aguarde <span id="t">5</span>s...</div>
   <div class="result" id="res"></div>
+  <div class="error" id="err">Link ou canal inválido.</div>
   <button id="subscribe">🔔 Inscrever-se</button>
   <button id="baixar">⬇️ Baixar</button>
 </div>
-
 <div class="footer">
-  Cliques: <span id="c">0</span> • dev: vortex
+  Cliques reais: <span id="c">0</span>
+  <div class="stats">Online agora: <span id="on">0</span> • dev: vortex</div>
 </div>
 </div>
 
-<!-- 🔥 FIREBASE -->
+<!-- FIREBASE v8 -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -65,75 +49,94 @@ firebase.initializeApp({
   databaseURL: "https://vortexxxxxxxxx-5159f-default-rtdb.firebaseio.com",
   projectId: "vortexxxxxxxxx-5159f"
 });
-
 const db = firebase.database();
 
-/* ===== BASE64 ===== */
-function decode64(s){
-  return atob(s.replace(/-/g,'+').replace(/_/g,'/'));
+/* ===== UTIL ===== */
+const $ = id => document.getElementById(id);
+const decode64 = s => atob(s.replace(/-/g,'+').replace(/_/g,'/'));
+
+function normalizeURL(raw){
+  if(!raw) return null;
+  const v = raw.trim();
+  if(!v) return null;
+  if(/^https?:\/\//i.test(v)) return v;
+  if(/^[\w-]+(\.[\w-]+)+/.test(v)) return 'https://' + v;
+  return null;
 }
 
-/* ===== PEGAR DADOS ===== */
+/* ===== DADOS DA URL ===== */
 const parts = location.hash.substring(1).split('|');
 let link="", canal="", video="";
-
 try{
   if(parts[0]) link  = decode64(parts[0]);
   if(parts[1]) canal = decode64(parts[1]);
   if(parts[2]) video = decode64(parts[2]);
 }catch(e){}
+$('res').textContent = location.href;
 
-document.getElementById('res').textContent = location.href;
+const safeLink  = normalizeURL(link);
+const safeCanal = normalizeURL(canal);
 
-/* ===== ID ÚNICO DO LINK ===== */
-const linkID = btoa(link).replace(/=/g,'');
+/* ===== ID ÚNICO ===== */
+const linkID = btoa(safeLink || location.href).replace(/=/g,'');
 
-/* ===== REFERÊNCIA DO CONTADOR ===== */
-const clickRef = db.ref("clicks/" + linkID);
+/* ===== CONTADORES ===== */
+const clicksRef = db.ref('clicks/'+linkID+'/total');
+const onlineRef = db.ref('clicks/'+linkID+'/online');
+const mySession = onlineRef.push(true);
+mySession.onDisconnect().remove();
 
-/* ===== CONTADOR REALTIME ===== */
-clickRef.on("value", snap=>{
-  document.getElementById("c").textContent = snap.val() || 0;
-});
+clicksRef.on('value', s => $('c').textContent = s.val() || 0);
+onlineRef.on('value', s => $('on').textContent = s.numChildren());
 
 /* ===== VÍDEO ===== */
-const box = document.getElementById('videoBox');
-
+const box = $('videoBox');
 if(video){
   if(video.includes('youtube') || video.includes('youtu.be')){
-    let id = video.includes('v=')
-      ? video.split('v=')[1].split('&')[0]
-      : video.split('youtu.be/')[1].split('?')[0];
-
-    box.innerHTML = `
-      <iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1"
-      allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-  }else{
+    const id = video.includes('v=') ? video.split('v=')[1].split('&')[0] : video.split('youtu.be/')[1].split('?')[0];
+    box.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  } else {
     box.innerHTML = `<video src="${video}" autoplay muted loop controls></video>`;
   }
 }
 
 /* ===== TIMER ===== */
 let time = 5;
-const t = document.getElementById('t');
-const baixar = document.getElementById('baixar');
-const sub = document.getElementById('subscribe');
+const baixar = $('baixar');
+const sub = $('subscribe');
+const err = $('err');
 
-const interval = setInterval(()=>{
-  t.textContent = --time;
-  if(time <= 0){
-    clearInterval(interval);
-    baixar.style.display = 'block';
-    if(canal) sub.style.display = 'block';
+const timer = setInterval(()=>{
+  $('t').textContent = --time;
+  if(time<=0){
+    clearInterval(timer);
+    if(safeLink){
+      baixar.style.display='block';
+    }
+    if(safeCanal){
+      sub.style.display='block';
+    }
+    if(!safeLink && !safeCanal){
+      err.style.display='block';
+    }
   }
 },1000);
 
 /* ===== BOTÕES ===== */
-sub.onclick = ()=> canal && window.open(canal,'_blank');
+sub.onclick = ()=>{
+  if(!safeCanal){ err.style.display='block'; return; }
+  window.open(safeCanal,'_blank');
+};
 
 baixar.onclick = ()=>{
-  clickRef.transaction(v => (v || 0) + 1);
-  window.location.href = link.startsWith('http') ? link : 'https://' + link;
+  if(!safeLink){ err.style.display='block'; return; }
+
+  const key = 'clicked_'+linkID;
+  if(!sessionStorage.getItem(key)){
+    clicksRef.transaction(v => (v||0)+1);
+    sessionStorage.setItem(key,'1');
+  }
+  window.location.href = safeLink;
 };
 </script>
 </body>
