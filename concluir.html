@@ -28,7 +28,7 @@ button{width:100%;padding:14px;margin-top:10px;border-radius:10px;border:none;fo
   <div class="videoBox" id="videoBox"></div>
   <div class="timer">Aguarde <span id="t">5</span>s...</div>
   <div class="result" id="res"></div>
-  <div class="error" id="err">Link ou canal inválido.</div>
+  <div class="error" id="err">Link, canal ou ID inválido.</div>
   <button id="subscribe">🔔 Inscrever-se</button>
   <button id="baixar">⬇️ Baixar</button>
 </div>
@@ -53,7 +53,6 @@ const db = firebase.database();
 
 /* ===== UTIL ===== */
 const $ = id => document.getElementById(id);
-const decode64 = s => atob(s.replace(/-/g,'+').replace(/_/g,'/'));
 
 function normalizeURL(raw){
   if(!raw) return null;
@@ -64,80 +63,73 @@ function normalizeURL(raw){
   return null;
 }
 
-/* ===== DADOS DA URL ===== */
-const parts = location.hash.substring(1).split('|');
-let link="", canal="", video="";
-try{
-  if(parts[0]) link  = decode64(parts[0]);
-  if(parts[1]) canal = decode64(parts[1]);
-  if(parts[2]) video = decode64(parts[2]);
-}catch(e){}
-$('res').textContent = location.href;
+/* ===== PEGAR ID DA URL ===== */
+const linkID = location.hash ? location.hash.substring(1) : '';
+if(!linkID){
+  $('err').style.display='block';
+  $('res').textContent = 'ID não informado. Gere o link novamente.';
+} else {
+  $('res').textContent = location.href;
 
-const safeLink  = normalizeURL(link);
-const safeCanal = normalizeURL(canal);
+  /* ===== BUSCAR DADOS NO FIREBASE ===== */
+  db.ref('links/'+linkID).once('value').then(snap=>{
+    const data = snap.val();
+    if(!data){
+      $('err').style.display='block';
+      return;
+    }
 
-/* ===== ID ÚNICO ===== */
-const linkID = btoa(safeLink || location.href).replace(/=/g,'');
+    const safeLink  = normalizeURL(data.l);
+    const safeCanal = normalizeURL(data.c);
 
-/* ===== CONTADORES ===== */
-const clicksRef = db.ref('clicks/'+linkID+'/total');
-const onlineRef = db.ref('clicks/'+linkID+'/online');
-const mySession = onlineRef.push(true);
-mySession.onDisconnect().remove();
+    /* ===== CONTADORES ===== */
+    const clicksRef = db.ref('links/'+linkID+'/clicks');
+    const onlineRef = db.ref('online/'+linkID);
+    const mySession = onlineRef.push(true);
+    mySession.onDisconnect().remove();
 
-clicksRef.on('value', s => $('c').textContent = s.val() || 0);
-onlineRef.on('value', s => $('on').textContent = s.numChildren());
+    clicksRef.on('value', s => $('c').textContent = s.val() || 0);
+    onlineRef.on('value', s => $('on').textContent = s.numChildren());
 
-/* ===== VÍDEO ===== */
-const box = $('videoBox');
-if(video){
-  if(video.includes('youtube') || video.includes('youtu.be')){
-    const id = video.includes('v=') ? video.split('v=')[1].split('&')[0] : video.split('youtu.be/')[1].split('?')[0];
-    box.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-  } else {
-    box.innerHTML = `<video src="${video}" autoplay muted loop controls></video>`;
-  }
+    /* ===== VÍDEO ===== */
+    if(data.v){
+      if(data.v.includes('youtube') || data.v.includes('youtu.be')){
+        const id = data.v.includes('v=') ? data.v.split('v=')[1].split('&')[0] : data.v.split('youtu.be/')[1].split('?')[0];
+        $('videoBox').innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+      } else {
+        $('videoBox').innerHTML = `<video src="${data.v}" autoplay muted loop controls></video>`;
+      }
+    }
+
+    /* ===== TIMER ===== */
+    let time = 5;
+    const baixar = $('baixar');
+    const sub = $('subscribe');
+    const err = $('err');
+
+    const timer = setInterval(()=>{
+      $('t').textContent = --time;
+      if(time<=0){
+        clearInterval(timer);
+        if(safeLink) baixar.style.display='block';
+        if(safeCanal) sub.style.display='block';
+        if(!safeLink && !safeCanal) err.style.display='block';
+      }
+    },1000);
+
+    /* ===== BOTÕES ===== */
+    sub.onclick = ()=>{
+      if(!safeCanal){ err.style.display='block'; return; }
+      window.open(safeCanal,'_blank');
+    };
+
+    baixar.onclick = ()=>{
+      if(!safeLink){ err.style.display='block'; return; }
+      clicksRef.transaction(v => (v||0)+1);
+      window.location.href = safeLink;
+    };
+  });
 }
-
-/* ===== TIMER ===== */
-let time = 5;
-const baixar = $('baixar');
-const sub = $('subscribe');
-const err = $('err');
-
-const timer = setInterval(()=>{
-  $('t').textContent = --time;
-  if(time<=0){
-    clearInterval(timer);
-    if(safeLink){
-      baixar.style.display='block';
-    }
-    if(safeCanal){
-      sub.style.display='block';
-    }
-    if(!safeLink && !safeCanal){
-      err.style.display='block';
-    }
-  }
-},1000);
-
-/* ===== BOTÕES ===== */
-sub.onclick = ()=>{
-  if(!safeCanal){ err.style.display='block'; return; }
-  window.open(safeCanal,'_blank');
-};
-
-baixar.onclick = ()=>{
-  if(!safeLink){ err.style.display='block'; return; }
-
-  const key = 'clicked_'+linkID;
-  if(!sessionStorage.getItem(key)){
-    clicksRef.transaction(v => (v||0)+1);
-    sessionStorage.setItem(key,'1');
-  }
-  window.location.href = safeLink;
-};
 </script>
 </body>
 </html>
