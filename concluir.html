@@ -120,7 +120,6 @@ button{
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-/* ===== FIREBASE CONFIG ===== */
 firebase.initializeApp({
   apiKey: "AIzaSyAx-jIvw9lqykjroKMWzRTEOlZ41Xk6-bY",
   databaseURL: "https://vortexxxxxxxxx-5159f-default-rtdb.firebaseio.com",
@@ -129,7 +128,6 @@ firebase.initializeApp({
 
 const db = firebase.database();
 
-/* ===== ELEMENTOS ===== */
 const t = document.getElementById('t');
 const c = document.getElementById('c');
 const baixar = document.getElementById('baixar');
@@ -139,87 +137,79 @@ const res = document.getElementById('res');
 const box = document.getElementById('videoBox');
 const err = document.getElementById('err');
 
-/* ===== PEGAR ID (HASH OU ?id=) ===== */
-let id = location.hash.replace('#','').trim();
-if(!id){
-  const params = new URLSearchParams(location.search);
-  id = (params.get('id') || '').trim();
-}
+/* ========= PEGAR ID ========= */
+let id = location.hash.slice(1);
 
-/* ===== SE NÃO TIVER ID, MOSTRA ERRO E NÃO QUEBRA ===== */
-if(!id){
+if (!id) {
   err.style.display = 'block';
-  res.textContent = 'Nenhum ID informado no link.';
+  err.textContent = 'Link inválido ou inexistente.';
+} else {
+  carregarLink(id);
 }
 
-let time = 5;
-let link = '';
-let canal = '';
-
-/* ===== VIDEO HANDLER ===== */
-function loadVideo(v){
-  box.innerHTML = '';
-  if(!v) return;
-
-  if(v.includes('youtube') || v.includes('youtu.be')){
-    let vid = '';
-    if(v.includes('v=')) vid = v.split('v=')[1].split('&')[0];
-    else if(v.includes('youtu.be/')) vid = v.split('youtu.be/')[1].split('?')[0];
-
-    if(vid){
-      box.innerHTML = `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-    }
-  }else{
-    box.innerHTML = `<video src="${v}" autoplay muted controls></video>`;
-  }
-}
-
-/* ===== BUSCAR DADOS SOMENTE SE TIVER ID ===== */
-if(id){
+function carregarLink(id){
   const ref = db.ref('links/' + id);
 
   ref.once('value').then(snap=>{
     if(!snap.exists()){
       err.style.display = 'block';
-      res.textContent = 'Este link não existe ou foi removido.';
+      err.textContent = 'Link removido ou inexistente.';
       return;
     }
 
     const data = snap.val();
-    link = data.l || '';
-    canal = data.c || '';
+
     dono.textContent = data.n || 'Vortex';
-    res.textContent = location.href;
+    res.textContent = location.origin + location.pathname + '#' + id;
 
-    loadVideo(data.v || '');
+    if(data.v) carregarVideo(data.v);
 
-    if(canal) sub.style.display = 'block';
+    if(data.c){
+      sub.style.display = 'block';
+      sub.onclick = () => window.open(data.c,'_blank');
+    }
 
-    ref.child('clicks').on('value',s=>{
+    ref.child('clicks').on('value', s=>{
       c.textContent = s.val() || 0;
     });
+
+    iniciarTimer(ref, data.l);
   });
 }
 
-/* ===== TIMER ===== */
-const interval = setInterval(()=>{
-  time--;
-  t.textContent = time;
-  if(time <= 0){
-    clearInterval(interval);
-    if(link) baixar.style.display = 'block';
+/* ========= VIDEO ========= */
+function carregarVideo(v){
+  if(v.includes('youtube') || v.includes('youtu.be')){
+    let vid = v.includes('v=')
+      ? v.split('v=')[1].split('&')[0]
+      : v.split('youtu.be/')[1];
+
+    box.innerHTML = `
+      <iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1"
+      allow="autoplay" allowfullscreen></iframe>`;
+  } else {
+    box.innerHTML = `<video src="${v}" controls autoplay muted></video>`;
   }
-},1000);
+}
 
-/* ===== AÇÕES ===== */
-sub.onclick = ()=> canal && window.open(canal,'_blank');
+/* ========= TIMER ========= */
+function iniciarTimer(ref, link){
+  let time = 5;
+  const timer = setInterval(()=>{
+    t.textContent = time;
+    time--;
 
-baixar.onclick = ()=>{
-  if(!link) return;
-  const ref = db.ref('links/' + id + '/clicks');
-  ref.transaction(v=>(v||0)+1);
-  window.location.href = link.startsWith('http') ? link : 'https://' + link;
-};
+    if(time < 0){
+      clearInterval(timer);
+
+      if(link){
+        baixar.style.display = 'block';
+        baixar.onclick = ()=>{
+          ref.child('clicks').transaction(v => (v||0)+1);
+          window.location.href = link.startsWith('http') ? link : 'https://' + link;
+        };
+      }
+    }
+  },1000);
+}
 </script>
-</body>
-</html>
