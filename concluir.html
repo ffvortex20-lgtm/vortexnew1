@@ -65,6 +65,11 @@ h1{
   border:1px dashed #9b4dff;
   margin-bottom:15px
 }
+.error{
+  color:#ffb3c1;
+  margin-top:10px;
+  display:none
+}
 
 /* ===== BUTTONS ===== */
 button{
@@ -100,6 +105,7 @@ button{
   <div class="videoBox" id="videoBox"></div>
   <div class="timer">Aguarde <span id="t">5</span>s...</div>
   <div class="result" id="res"></div>
+  <div class="error" id="err">Link inválido ou inexistente.</div>
   <button id="subscribe">🔔 Visitar canal</button>
   <button id="baixar">⬇️ Baixar</button>
 </div>
@@ -124,7 +130,6 @@ firebase.initializeApp({
 const db = firebase.database();
 
 /* ===== ELEMENTOS ===== */
-const id = location.hash.replace('#','');
 const t = document.getElementById('t');
 const c = document.getElementById('c');
 const baixar = document.getElementById('baixar');
@@ -132,10 +137,19 @@ const sub = document.getElementById('subscribe');
 const dono = document.getElementById('dono');
 const res = document.getElementById('res');
 const box = document.getElementById('videoBox');
+const err = document.getElementById('err');
 
+/* ===== PEGAR ID (HASH OU ?id=) ===== */
+let id = location.hash.replace('#','').trim();
 if(!id){
-  alert('Link inválido');
-  throw new Error('ID ausente');
+  const params = new URLSearchParams(location.search);
+  id = (params.get('id') || '').trim();
+}
+
+/* ===== SE NÃO TIVER ID, MOSTRA ERRO E NÃO QUEBRA ===== */
+if(!id){
+  err.style.display = 'block';
+  res.textContent = 'Nenhum ID informado no link.';
 }
 
 let time = 5;
@@ -160,29 +174,32 @@ function loadVideo(v){
   }
 }
 
-/* ===== BUSCAR DADOS ===== */
-const ref = db.ref('links/' + id);
+/* ===== BUSCAR DADOS SOMENTE SE TIVER ID ===== */
+if(id){
+  const ref = db.ref('links/' + id);
 
-ref.once('value').then(snap=>{
-  if(!snap.exists()){
-    alert('Link removido ou inexistente');
-    throw new Error('ID não encontrado');
-  }
+  ref.once('value').then(snap=>{
+    if(!snap.exists()){
+      err.style.display = 'block';
+      res.textContent = 'Este link não existe ou foi removido.';
+      return;
+    }
 
-  const data = snap.val();
-  link = data.l;
-  canal = data.c || '';
-  dono.textContent = data.n || 'Vortex';
-  res.textContent = location.href;
+    const data = snap.val();
+    link = data.l || '';
+    canal = data.c || '';
+    dono.textContent = data.n || 'Vortex';
+    res.textContent = location.href;
 
-  loadVideo(data.v || '');
+    loadVideo(data.v || '');
 
-  if(canal) sub.style.display = 'block';
+    if(canal) sub.style.display = 'block';
 
-  ref.child('clicks').on('value',s=>{
-    c.textContent = s.val() || 0;
+    ref.child('clicks').on('value',s=>{
+      c.textContent = s.val() || 0;
+    });
   });
-});
+}
 
 /* ===== TIMER ===== */
 const interval = setInterval(()=>{
@@ -190,7 +207,7 @@ const interval = setInterval(()=>{
   t.textContent = time;
   if(time <= 0){
     clearInterval(interval);
-    baixar.style.display = 'block';
+    if(link) baixar.style.display = 'block';
   }
 },1000);
 
@@ -199,7 +216,8 @@ sub.onclick = ()=> canal && window.open(canal,'_blank');
 
 baixar.onclick = ()=>{
   if(!link) return;
-  ref.child('clicks').transaction(v=>(v||0)+1);
+  const ref = db.ref('links/' + id + '/clicks');
+  ref.transaction(v=>(v||0)+1);
   window.location.href = link.startsWith('http') ? link : 'https://' + link;
 };
 </script>
