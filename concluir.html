@@ -58,8 +58,13 @@ function normalizeURL(raw){
   if(!raw) return null;
   const v = raw.trim();
   if(!v) return null;
+
+  // aceita youtube, tiktok, whatsapp, qualquer link com esquema
   if(/^https?:\/\//i.test(v)) return v;
-  if(/^[\w-]+(\.[\w-]+)+/.test(v)) return 'https://' + v;
+
+  // aceita links sem protocolo (ex: youtube.com, t.me, wa.me)
+  if(/^[a-z0-9.-]+\.[a-z]{2,}.*$/i.test(v)) return 'https://' + v;
+
   return null;
 }
 
