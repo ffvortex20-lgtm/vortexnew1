@@ -6,61 +6,22 @@
 <title>Vortex Links • Concluir</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-body{
-  background:radial-gradient(circle at top,#6a00ff,#12001f);
-  min-height:200vh;
-  color:#fff
-}
-.container{
-  max-width:800px;
-  margin:60px auto;
-  background:rgba(0,0,0,.55);
-  border-radius:16px;
-  padding:30px;
-  box-shadow:0 0 30px #9b4dff
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:radial-gradient(circle at top,#6a00ff,#12001f);min-height:200vh;color:#fff}
+.container{max-width:800px;margin:60px auto;background:rgba(0,0,0,.55);
+border-radius:16px;padding:30px;box-shadow:0 0 30px #9b4dff}
 h1{text-align:center;color:#d6b3ff;text-shadow:0 0 10px #a855ff}
-.box{
-  background:rgba(20,0,40,.85);
-  border-radius:14px;
-  padding:20px;
-  box-shadow:0 0 15px #7a2bff;
-  text-align:center
-}
-.videoBox{
-  margin-top:10px;
-  border-radius:12px;
-  overflow:hidden;
-  background:#000
-}
-.videoBox iframe,
-.videoBox video{
-  width:100%;
-  height:300px;
-  border:none
-}
+.box{background:rgba(20,0,40,.85);border-radius:14px;padding:20px;
+box-shadow:0 0 15px #7a2bff;text-align:center}
+.videoBox{margin-top:10px;border-radius:12px;overflow:hidden;background:#000}
+.videoBox iframe,.videoBox video{width:100%;height:300px;border:none}
 .timer{font-size:18px;margin:15px 0;color:#ffd6ff}
-.result{
-  background:#140022;
-  padding:12px;
-  border-radius:10px;
-  border:1px dashed #9b4dff;
-  margin-bottom:15px;
-  word-break:break-all
-}
+.result{background:#140022;padding:12px;border-radius:10px;
+border:1px dashed #9b4dff;margin-bottom:15px;word-break:break-all}
 button{
-  width:100%;
-  padding:14px;
-  margin-top:8px;
-  border-radius:10px;
-  border:none;
-  font-weight:bold;
-  background:linear-gradient(45deg,#8f3bff,#c77dff);
-  color:#fff;
-  cursor:pointer;
-  box-shadow:0 0 15px #9b4dff;
-  display:none
+ width:100%;padding:14px;margin-top:8px;border-radius:10px;border:none;
+ font-weight:bold;background:linear-gradient(45deg,#8f3bff,#c77dff);
+ color:#fff;cursor:pointer;box-shadow:0 0 15px #9b4dff;display:none
 }
 .footer{text-align:center;margin-top:15px;font-size:14px;color:#e0ccff}
 </style>
@@ -69,7 +30,6 @@ button{
 <body>
 <div class="container">
 <h1>DESBLOQUEANDO LINK</h1>
-
 <p id="creatorName" style="text-align:center;color:#cfa9ff"></p>
 <p id="device" style="text-align:center;font-size:13px;color:#aaa"></p>
 
@@ -77,7 +37,6 @@ button{
   <div class="videoBox" id="videoBox"></div>
   <div class="timer">Aguarde <span id="t">5</span>s...</div>
   <div class="result" id="res"></div>
-
   <button id="subscribe">🔔 Inscrever-se</button>
   <button id="baixar">⬇️ Baixar</button>
 </div>
@@ -86,88 +45,48 @@ button{
 </div>
 
 <script>
-/* ===== DECODIFICAR JSON BASE64 SAFE ===== */
-function dec(str){
-  return JSON.parse(
-    atob(str.replace(/-/g,'+').replace(/_/g,'/'))
-  );
-}
+const id = location.hash.substring(1);
+const data = JSON.parse(localStorage.getItem("vortex_"+id)||"null");
+if(!data) document.body.innerHTML="<h2 style='text-align:center'>Link inválido</h2>";
 
-/* ===== PEGAR DADOS ===== */
-let data = {};
-try{
-  data = dec(location.hash.substring(1));
-}catch(e){}
+const {l:link,c:canal,v:video,n:creator} = data;
+creatorName.textContent="Criador: "+creator;
+device.textContent=/Android|iPhone|iPad/i.test(navigator.userAgent)?"📱 Celular":"💻 Computador";
+res.textContent=location.href;
 
-const link    = data.l || "";
-const canal   = data.c || "";
-const video   = data.v || "";
-const creator = data.n || "Vortex";
-
-/* ===== MOSTRAR DADOS ===== */
-creatorName.textContent = "Criador: " + creator;
-res.textContent = location.href;
-
-/* ===== DISPOSITIVO ===== */
-device.textContent =
-  /Android|iPhone|iPad/i.test(navigator.userAgent)
-  ? "📱 Celular"
-  : "💻 Computador";
-
-/* ===== VÍDEO ===== */
+/* vídeo */
 if(video){
-  if(video.includes("youtu")){
-    let id = video.includes("v=")
-      ? video.split("v=")[1].split("&")[0]
-      : video.split("youtu.be/")[1];
-
-    videoBox.innerHTML = `
-      <iframe
-        src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1"
-        allow="autoplay; encrypted-media"
-        allowfullscreen>
-      </iframe>`;
-  }else{
-    videoBox.innerHTML =
-      `<video src="${video}" autoplay muted loop controls></video>`;
-  }
+ if(video.includes("youtu")){
+  const id=video.includes("v=")?video.split("v=")[1].split("&")[0]:video.split("youtu.be/")[1];
+  videoBox.innerHTML=`<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1" allowfullscreen></iframe>`;
+ }else videoBox.innerHTML=`<video src="${video}" autoplay muted loop controls></video>`;
 }
 
-/* ===== TIMER ===== */
-let time = 5;
-const timer = setInterval(()=>{
-  t.textContent = --time;
-  if(time <= 0){
-    clearInterval(timer);
-    baixar.style.display = "block";
-    if(canal) subscribe.style.display = "block";
-  }
+/* timer */
+let time=5;
+const inter=setInterval(()=>{
+ t.textContent=--time;
+ if(time<=0){
+  clearInterval(inter);
+  baixar.style.display="block";
+  if(canal) subscribe.style.display="block";
+ }
 },1000);
 
-/* ===== CONTADOR POR LINK ===== */
-const key = "vortex_" + btoa(link);
-let clicks = +localStorage.getItem(key) || 0;
-c.textContent = clicks;
+/* contador */
+const key="clicks_"+id;
+let clicks=+localStorage.getItem(key)||0;
+c.textContent=clicks;
 
-/* ===== PROTEÇÃO DE CLIQUE ===== */
-let last = 0;
-baixar.onclick = ()=>{
-  if(Date.now() - last < 5000)
-    return alert("⏳ Aguarde 5s");
-
-  last = Date.now();
-  clicks++;
-  localStorage.setItem(key, clicks);
-  c.textContent = clicks;
-
-  location.href = link.startsWith("http")
-    ? link
-    : "https://" + link;
+let last=0;
+baixar.onclick=()=>{
+ if(Date.now()-last<5000) return alert("⏳ Aguarde 5s");
+ last=Date.now();
+ localStorage.setItem(key,++clicks);
+ c.textContent=clicks;
+ location.href=link.startsWith("http")?link:"https://"+link;
 };
-
-subscribe.onclick = ()=>{
-  canal && window.open(canal, "_blank");
-};
+subscribe.onclick=()=>canal&&window.open(canal,"_blank");
 </script>
 </body>
 </html>
