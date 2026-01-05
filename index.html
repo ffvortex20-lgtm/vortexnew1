@@ -7,75 +7,19 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-body{
-  background:radial-gradient(circle at top,#6a00ff,#12001f);
-  min-height:100vh;
-  color:#fff
-}
-.container{
-  max-width:720px;
-  margin:80px auto;
-  background:rgba(0,0,0,.55);
-  border-radius:16px;
-  padding:30px;
-  box-shadow:0 0 30px #9b4dff
-}
-h1{
-  text-align:center;
-  margin-bottom:20px;
-  color:#d6b3ff;
-  text-shadow:0 0 10px #a855ff
-}
-.box{
-  background:rgba(20,0,40,.85);
-  border-radius:14px;
-  padding:22px;
-  box-shadow:0 0 15px #7a2bff;
-  text-align:center
-}
-input{
-  width:100%;
-  padding:14px;
-  border-radius:10px;
-  border:none;
-  margin-bottom:14px;
-  font-size:15px
-}
+body{background:radial-gradient(circle at top,#6a00ff,#12001f);min-height:100vh;color:#fff}
+.container{max-width:700px;margin:80px auto;background:rgba(0,0,0,.55);
+border-radius:16px;padding:30px;box-shadow:0 0 30px #9b4dff}
+h1{text-align:center;margin-bottom:20px;color:#d6b3ff;text-shadow:0 0 10px #a855ff}
+.box{background:rgba(20,0,40,.8);border-radius:14px;padding:20px;
+box-shadow:0 0 15px #7a2bff;text-align:center}
+input{width:100%;padding:14px;border-radius:10px;border:none;margin-bottom:12px;font-size:15px}
 button{
-  width:100%;
-  padding:14px;
-  margin-top:8px;
-  border-radius:10px;
-  border:none;
-  font-weight:bold;
-  background:linear-gradient(45deg,#8f3bff,#c77dff);
-  color:#fff;
-  cursor:pointer;
-  box-shadow:0 0 15px #9b4dff;
-  display:none
+ width:100%;padding:14px;border-radius:10px;border:none;font-weight:bold;
+ background:linear-gradient(45deg,#8f3bff,#c77dff);
+ color:#fff;cursor:pointer;box-shadow:0 0 15px #9b4dff;display:none
 }
-button:hover{filter:brightness(1.15)}
-
-.stats{
-  margin-top:18px;
-  padding:14px;
-  background:#140022;
-  border-radius:12px;
-  border:1px dashed #9b4dff;
-  text-align:center;
-  font-size:14px
-}
-.stats span{
-  color:#ffd6ff;
-  font-weight:bold
-}
-
-.footer{
-  text-align:center;
-  margin-top:16px;
-  font-size:14px;
-  color:#e0ccff
-}
+.footer{text-align:center;margin-top:15px;font-size:14px;color:#e0ccff}
 </style>
 </head>
 
@@ -86,71 +30,34 @@ button:hover{filter:brightness(1.15)}
 <div class="box">
   <input id="link" placeholder="🔗 Link de download (obrigatório)">
   <input id="canal" placeholder="📢 Link do canal (opcional)">
-  <input id="video" placeholder="🎬 Link do vídeo (YouTube ou MP4)">
+  <input id="video" placeholder="🎬 Vídeo (YouTube ou MP4)">
   <input id="creator" placeholder="👤 Nome do criador">
-
   <button id="enviar">🚀 Gerar Link</button>
-
-  <!-- PAINEL DE ESTATÍSTICAS -->
-  <div class="stats">
-    Links gerados: <span id="gen">0</span> •
-    Cliques totais: <span id="total">0</span>
-  </div>
 </div>
 
 <div class="footer">dev: vortex</div>
 </div>
 
 <script>
-/* ===== BASE64 COMPACTO ===== */
-function enc(s){
-  return btoa(unescape(encodeURIComponent(s)))
-    .replace(/\+/g,'-')
-    .replace(/\//g,'_')
-    .replace(/=+$/,'');
+function uid(len=5){
+  const c="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let r=""; for(let i=0;i<len;i++) r+=c[Math.random()*c.length|0];
+  return r;
 }
 
-/* ===== ELEMENTOS ===== */
-const l = document.getElementById("link");
-const c = document.getElementById("canal");
-const v = document.getElementById("video");
-const n = document.getElementById("creator");
-const b = document.getElementById("enviar");
-const gen = document.getElementById("gen");
-const total = document.getElementById("total");
+const l=link,c=canal,v=video,n=creator,b=enviar;
 
-/* ===== CONTADOR DE LINKS ===== */
-let generated = parseInt(localStorage.getItem("vortex_generated") || 0);
-gen.textContent = generated;
+l.oninput=()=>b.style.display=l.value.trim()?"block":"none";
 
-/* ===== SOMAR CLIQUES (VINDOS DO CONCLUIR) ===== */
-let sum = 0;
-for(let i=0;i<localStorage.length;i++){
-  const k = localStorage.key(i);
-  if(k.startsWith("vortex_")){
-    sum += parseInt(localStorage.getItem(k)) || 0;
-  }
-}
-total.textContent = sum;
-
-/* ===== MOSTRAR BOTÃO ===== */
-l.oninput = ()=>{
-  b.style.display = l.value.trim() ? "block" : "none";
-};
-
-/* ===== GERAR LINK ===== */
-b.onclick = ()=>{
-  generated++;
-  localStorage.setItem("vortex_generated", generated);
-  gen.textContent = generated;
-
-  const hash =
-    enc(l.value) + "|" +
-    enc(c.value || "") + "|" +
-    enc(v.value || "") + "|" +
-    enc(n.value || "Vortex");
-
-  location.href = "concluir.html#" + hash;
+b.onclick=()=>{
+  const id = uid();
+  localStorage.setItem("vortex_"+id, JSON.stringify({
+    l:l.value.trim(),
+    c:c.value.trim(),
+    v:v.value.trim(),
+    n:n.value.trim()||"Vortex"
+  }));
+  location.href="concluir.html#"+id;
 };
 </script>
 </body>
