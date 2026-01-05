@@ -6,21 +6,93 @@
 <title>Vortex Links • Concluir</title>
 
 <style>
+/* ===== RESET ===== */
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-body{background:radial-gradient(circle at top,#6a00ff,#12001f);min-height:200vh;color:#fff}
-.container{max-width:800px;margin:60px auto;background:rgba(0,0,0,.55);border-radius:16px;padding:30px;box-shadow:0 0 30px #9b4dff}
-h1{text-align:center;margin-bottom:20px;color:#d6b3ff;text-shadow:0 0 10px #a855ff}
-.box{background:rgba(20,0,40,.8);border-radius:14px;padding:20px;box-shadow:0 0 15px #7a2bff;text-align:center}
-.videoBox{margin-top:10px;border-radius:12px;overflow:hidden;background:#000}
-.videoBox iframe,.videoBox video{width:100%;height:300px;border:none}
+
+/* ===== BODY ===== */
+body{
+  background:radial-gradient(circle at top,#6a00ff,#12001f);
+  min-height:100vh;
+  color:#fff
+}
+
+/* ===== LAYOUT ===== */
+.container{
+  max-width:800px;
+  margin:60px auto;
+  background:rgba(0,0,0,.55);
+  border-radius:16px;
+  padding:30px;
+  box-shadow:0 0 30px #9b4dff
+}
+
+h1{
+  text-align:center;
+  margin-bottom:20px;
+  color:#d6b3ff;
+  text-shadow:0 0 10px #a855ff
+}
+
+.box{
+  background:rgba(20,0,40,.8);
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 0 15px #7a2bff;
+  text-align:center
+}
+
+/* ===== VIDEO ===== */
+.videoBox{
+  margin-top:10px;
+  border-radius:12px;
+  overflow:hidden;
+  background:#000
+}
+.videoBox iframe,
+.videoBox video{
+  width:100%;
+  height:300px;
+  border:none
+}
+
+/* ===== INFO ===== */
 .timer{font-size:18px;margin:15px 0;color:#ffd6ff}
-.result{word-break:break-all;background:#140022;padding:12px;border-radius:10px;border:1px dashed #9b4dff;margin-bottom:15px}
-button{width:100%;padding:14px;margin-top:10px;border-radius:10px;border:none;font-size:15px;font-weight:bold;cursor:pointer;color:#fff;background:linear-gradient(45deg,#8f3bff,#c77dff);box-shadow:0 0 15px #9b4dff;display:none}
-.footer{text-align:center;margin-top:15px;font-size:14px;color:#e0ccff}
+.result{
+  word-break:break-all;
+  background:#140022;
+  padding:12px;
+  border-radius:10px;
+  border:1px dashed #9b4dff;
+  margin-bottom:15px
+}
+
+/* ===== BUTTONS ===== */
+button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border-radius:10px;
+  border:none;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  color:#fff;
+  background:linear-gradient(45deg,#8f3bff,#c77dff);
+  box-shadow:0 0 15px #9b4dff;
+  display:none
+}
+
+/* ===== FOOTER ===== */
+.footer{
+  text-align:center;
+  margin-top:15px;
+  font-size:14px;
+  color:#e0ccff
+}
 </style>
 </head>
-
 <body>
+
 <div class="container">
 <h1>DESBLOQUEANDO LINK</h1>
 
@@ -28,120 +100,108 @@ button{width:100%;padding:14px;margin-top:10px;border-radius:10px;border:none;fo
   <div class="videoBox" id="videoBox"></div>
   <div class="timer">Aguarde <span id="t">5</span>s...</div>
   <div class="result" id="res"></div>
-
-  <button id="subscribe">🔔 Inscrever-se</button>
+  <button id="subscribe">🔔 Visitar canal</button>
   <button id="baixar">⬇️ Baixar</button>
 </div>
 
 <div class="footer">
-  Cliques reais: <span id="c">0</span> •
-  Online agora: <span id="on">0</span> •
-  dono: <span id="owner">---</span>
+  Cliques: <span id="c">0</span> • Criador: <span id="dono">-</span> • dev: vortex
 </div>
 </div>
 
-<!-- 🔥 FIREBASE -->
+<!-- ===== FIREBASE ===== -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-/* =====================================================
-   🔥 FIREBASE CONFIG
-===================================================== */
+/* ===== FIREBASE CONFIG ===== */
 firebase.initializeApp({
   apiKey: "AIzaSyAx-jIvw9lqykjroKMWzRTEOlZ41Xk6-bY",
   databaseURL: "https://vortexxxxxxxxx-5159f-default-rtdb.firebaseio.com",
   projectId: "vortexxxxxxxxx-5159f"
 });
+
 const db = firebase.database();
 
-/* =====================================================
-   🆔 PEGAR ID CURTO DA URL
-===================================================== */
+/* ===== ELEMENTOS ===== */
 const id = location.hash.replace('#','');
+const t = document.getElementById('t');
+const c = document.getElementById('c');
+const baixar = document.getElementById('baixar');
+const sub = document.getElementById('subscribe');
+const dono = document.getElementById('dono');
+const res = document.getElementById('res');
+const box = document.getElementById('videoBox');
+
 if(!id){
-  alert("Link inválido");
-  throw new Error("ID ausente");
+  alert('Link inválido');
+  throw new Error('ID ausente');
 }
-document.getElementById("res").textContent = location.href;
 
-/* =====================================================
-   📥 BUSCAR DADOS DO LINK
-===================================================== */
-db.ref("links/"+id).once("value").then(snap=>{
-  const d = snap.val();
-  if(!d){
-    alert("Link removido ou inexistente");
-    return;
+let time = 5;
+let link = '';
+let canal = '';
+
+/* ===== VIDEO HANDLER ===== */
+function loadVideo(v){
+  box.innerHTML = '';
+  if(!v) return;
+
+  if(v.includes('youtube') || v.includes('youtu.be')){
+    let vid = '';
+    if(v.includes('v=')) vid = v.split('v=')[1].split('&')[0];
+    else if(v.includes('youtu.be/')) vid = v.split('youtu.be/')[1].split('?')[0];
+
+    if(vid){
+      box.innerHTML = `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    }
+  }else{
+    box.innerHTML = `<video src="${v}" autoplay muted controls></video>`;
+  }
+}
+
+/* ===== BUSCAR DADOS ===== */
+const ref = db.ref('links/' + id);
+
+ref.once('value').then(snap=>{
+  if(!snap.exists()){
+    alert('Link removido ou inexistente');
+    throw new Error('ID não encontrado');
   }
 
-  /* ===== DONO ===== */
-  document.getElementById("owner").textContent = d.n || "Vortex";
+  const data = snap.val();
+  link = data.l;
+  canal = data.c || '';
+  dono.textContent = data.n || 'Vortex';
+  res.textContent = location.href;
 
-  /* =====================================================
-     🔢 CONTADOR DE CLIQUES (REALTIME)
-  ===================================================== */
-  const clicksRef = db.ref("links/"+id+"/clicks");
-  clicksRef.on("value", s=>{
-    document.getElementById("c").textContent = s.val() || 0;
+  loadVideo(data.v || '');
+
+  if(canal) sub.style.display = 'block';
+
+  ref.child('clicks').on('value',s=>{
+    c.textContent = s.val() || 0;
   });
-
-  /* =====================================================
-     👥 ONLINE AGORA (REALTIME)
-  ===================================================== */
-  const onlineRef = db.ref("online/"+id);
-  const mySession = onlineRef.push(true);
-  mySession.onDisconnect().remove();
-
-  onlineRef.on("value", s=>{
-    document.getElementById("on").textContent = s.numChildren();
-  });
-
-  /* =====================================================
-     🎬 VÍDEO
-  ===================================================== */
-  const box = document.getElementById("videoBox");
-  if(d.v){
-    if(d.v.includes("youtube") || d.v.includes("youtu.be")){
-      const vid = d.v.includes("v=")
-        ? d.v.split("v=")[1].split("&")[0]
-        : d.v.split("youtu.be/")[1].split("?")[0];
-
-      box.innerHTML = `
-        <iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1"
-        allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-    }else{
-      box.innerHTML = `<video src="${d.v}" autoplay muted loop controls></video>`;
-    }
-  }
-
-  /* =====================================================
-     ⏱️ TIMER
-  ===================================================== */
-  let time = 5;
-  const t = document.getElementById("t");
-  const baixar = document.getElementById("baixar");
-  const sub = document.getElementById("subscribe");
-
-  const timer = setInterval(()=>{
-    t.textContent = --time;
-    if(time <= 0){
-      clearInterval(timer);
-      baixar.style.display = "block";
-      if(d.c) sub.style.display = "block";
-    }
-  },1000);
-
-  /* =====================================================
-     🔘 BOTÕES
-  ===================================================== */
-  sub.onclick = ()=> window.open(d.c, "_blank");
-
-  baixar.onclick = ()=>{
-    clicksRef.transaction(v => (v || 0) + 1);
-    window.location.href = d.l.startsWith("http") ? d.l : "https://" + d.l;
-  };
 });
+
+/* ===== TIMER ===== */
+const interval = setInterval(()=>{
+  time--;
+  t.textContent = time;
+  if(time <= 0){
+    clearInterval(interval);
+    baixar.style.display = 'block';
+  }
+},1000);
+
+/* ===== AÇÕES ===== */
+sub.onclick = ()=> canal && window.open(canal,'_blank');
+
+baixar.onclick = ()=>{
+  if(!link) return;
+  ref.child('clicks').transaction(v=>(v||0)+1);
+  window.location.href = link.startsWith('http') ? link : 'https://' + link;
+};
 </script>
 </body>
 </html>
