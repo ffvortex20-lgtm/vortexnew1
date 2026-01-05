@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vortex Links • Painel</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{
+  background:radial-gradient(circle at top,#6a00ff,#12001f);
+  min-height:100vh;
+  color:#fff
+}
+.container{
+  max-width:900px;
+  margin:60px auto;
+  background:rgba(0,0,0,.55);
+  border-radius:16px;
+  padding:30px;
+  box-shadow:0 0 30px #9b4dff
+}
+h1{
+  text-align:center;
+  color:#d6b3ff;
+  text-shadow:0 0 10px #a855ff;
+  margin-bottom:20px
+}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
+  margin-bottom:25px
+}
+.card{
+  background:rgba(20,0,40,.8);
+  border-radius:14px;
+  padding:20px;
+  text-align:center;
+  box-shadow:0 0 15px #7a2bff
+}
+.card h2{font-size:26px;color:#ffd6ff}
+.card p{font-size:14px;color:#ccc}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px
+}
+th,td{
+  padding:12px;
+  text-align:left;
+  border-bottom:1px solid rgba(255,255,255,.1)
+}
+th{
+  color:#ffd6ff;
+  font-size:14px
+}
+td{
+  font-size:13px;
+  color:#eee;
+  word-break:break-all
+}
+tr:hover{background:rgba(255,255,255,.05)}
+
+.footer{
+  text-align:center;
+  margin-top:20px;
+  font-size:13px;
+  color:#bbb
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>📊 Painel de Estatísticas</h1>
+
+<div class="cards">
+  <div class="card">
+    <h2 id="totalLinks">0</h2>
+    <p>Links criados</p>
+  </div>
+  <div class="card">
+    <h2 id="totalClicks">0</h2>
+    <p>Cliques totais</p>
+  </div>
+  <div class="card">
+    <h2 id="topLink">—</h2>
+    <p>Link mais clicado</p>
+  </div>
+</div>
+
+<table>
+<thead>
+<tr>
+  <th>Link (hash)</th>
+  <th>Cliques</th>
+</tr>
+</thead>
+<tbody id="list"></tbody>
+</table>
+
+<div class="footer">dev: vortex</div>
+</div>
+
+<script>
+let totalClicks = 0;
+let totalLinks = 0;
+let topClicks = 0;
+let topLink = "—";
+
+const tbody = document.getElementById("list");
+
+for(let i=0;i<localStorage.length;i++){
+  const key = localStorage.key(i);
+
+  // pega só os cliques do vortex
+  if(key.startsWith("vortex_")){
+    const clicks = parseInt(localStorage.getItem(key));
+    totalLinks++;
+    totalClicks += clicks;
+
+    if(clicks > topClicks){
+      topClicks = clicks;
+      topLink = key.replace("vortex_","");
+    }
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${key.replace("vortex_","")}</td>
+      <td>${clicks}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+totalLinks = totalLinks || 0;
+totalClicks = totalClicks || 0;
+
+document.getElementById("totalLinks").textContent = totalLinks;
+document.getElementById("totalClicks").textContent = totalClicks;
+document.getElementById("topLink").textContent =
+  topClicks ? topClicks + " cliques" : "—";
+</script>
+</body>
+</html>
