@@ -2,29 +2,59 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Download</title>
+<title>Android Updates - Delta</title>
+
 <style>
-body{margin:0;background:#0b0e14;color:#fff;font-family:Arial;overflow:hidden}
-.box{position:relative;z-index:2;margin:120px auto;background:#161b22;
-padding:30px;border-radius:12px;max-width:400px;text-align:center}
-a{display:block;margin-top:20px;padding:12px;background:#238636;color:#fff;
-text-decoration:none;border-radius:8px;font-weight:bold}
-canvas{position:fixed;top:0;left:0;z-index:1}
+body {
+  background-color: #0b0e14;
+  color: white;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  overflow: hidden;
+}
+.main-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #30363d;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 900px;
+  padding: 40px;
+  margin: 100px auto;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+.btn-dl {
+  background: #007bff;
+  color: white;
+  padding: 12px 35px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  margin-top: 20px;
+}
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
 </style>
 </head>
+
 <body>
 
 <canvas id="bg"></canvas>
 
-<div class="box">
-  <h2 id="nome">Arquivo</h2>
-  <a id="download" href="#">DOWNLOAD</a>
+<div class="main-card">
+  <h1 id="nome">Arquivo</h1>
+  <a id="download" class="btn-dl" href="#">Download</a>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, get, update } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAx-jIvw9lqykjroKMWzRTEOlZ41Xk6-bY",
@@ -39,31 +69,43 @@ const id = new URLSearchParams(location.search).get("id");
 const linkRef = ref(db, "links/" + id);
 
 const snap = await get(linkRef);
-const d = snap.val();
+const data = snap.val();
 
-document.getElementById("nome").innerText = d.name;
+document.getElementById("nome").innerText = data.name;
 const btn = document.getElementById("download");
-btn.href = d.url;
+btn.href = data.url;
 
 btn.onclick = () => {
-  update(linkRef, { clicks: (d.clicks || 0) + 1 });
+  update(linkRef, { clicks: (data.clicks || 0) + 1 });
 };
 </script>
 
 <script>
 // ❄️ SNOW VERMELHO + LINHA BRANCA
-const c=document.getElementById("bg"),x=c.getContext("2d");
-c.width=innerWidth;c.height=innerHeight;
-let p=[...Array(120)].map(()=>({x:Math.random()*c.width,y:Math.random()*c.height}));
-function draw(){
-x.clearRect(0,0,c.width,c.height);
-p.forEach(a=>{
-a.y+=1;if(a.y>c.height)a.y=0;
-x.fillStyle="red";x.fillRect(a.x,a.y,2,2);
-x.strokeStyle="white";x.beginPath();
-x.moveTo(a.x,a.y);x.lineTo(a.x+6,a.y+6);x.stroke();
-});
-requestAnimationFrame(draw);
+const c = document.getElementById("bg");
+const ctx = c.getContext("2d");
+c.width = innerWidth;
+c.height = innerHeight;
+
+let p = [...Array(120)].map(() => ({
+  x: Math.random() * c.width,
+  y: Math.random() * c.height
+}));
+
+function draw() {
+  ctx.clearRect(0,0,c.width,c.height);
+  p.forEach(a => {
+    a.y += 1;
+    if (a.y > c.height) a.y = 0;
+    ctx.fillStyle = "red";
+    ctx.fillRect(a.x,a.y,2,2);
+    ctx.strokeStyle = "white";
+    ctx.beginPath();
+    ctx.moveTo(a.x,a.y);
+    ctx.lineTo(a.x+6,a.y+6);
+    ctx.stroke();
+  });
+  requestAnimationFrame(draw);
 }
 draw();
 </script>
