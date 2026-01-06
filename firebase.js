@@ -10,7 +10,7 @@ export const firebaseConfig = {
   projectId: "vortexxxxxxxxx-5159f",
   storageBucket: "vortexxxxxxxxx-5159f.firebasestorage.app",
   messagingSenderId: "921732735688",
-  appId: "1:921732735688:web:vortexweb"
+  appId: "1:921732735688:web:vortex"
 };
 
 export const app = initializeApp(firebaseConfig);
