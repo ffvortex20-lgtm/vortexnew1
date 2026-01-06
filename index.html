@@ -22,16 +22,22 @@ body {
   border: 1px solid #30363d;
   width: 320px;
 }
-input, button {
+input {
   width: 100%;
   padding: 10px;
-  margin-top: 10px;
+  margin: 10px 0;
   border-radius: 5px;
+  border: 1px solid #30363d;
+  background: #0d1117;
+  color: white;
 }
 button {
+  width: 100%;
+  padding: 12px;
   background: #238636;
   color: white;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
 }
@@ -43,49 +49,43 @@ button {
 <div class="box">
   <h3>Configurar Página</h3>
 
-  <input type="file" id="file">
-  <button id="gerar">Ir para Página de Download</button>
+  <input type="text" id="title" placeholder="Título (Ex: Delta V702)">
+  <input type="text" id="fname" placeholder="Nome do arquivo (Ex: delta.apk)">
+  <input type="text" id="fsize" placeholder="Tamanho (Ex: 222 MB)">
+
+  <button onclick="gerar()">Ir para Página de Download</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 /* 🔥 SUA FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyAx-jIvw9lqykjroKMWzRTEOlZ41Xk6-bY",
   databaseURL: "https://vortexxxxxxxxx-5159f-default-rtdb.firebaseio.com",
-  projectId: "vortexxxxxxxxx-5159f",
-  storageBucket: "vortexxxxxxxxx-5159f.firebasestorage.app"
+  projectId: "vortexxxxxxxxx-5159f"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const storage = getStorage(app);
 
-document.getElementById("gerar").onclick = async () => {
-  const file = document.getElementById("file").files[0];
-  if (!file) {
-    alert("Selecione um arquivo");
-    return;
-  }
+window.gerar = async () => {
+  const title = document.getElementById("title").value || "Android Update";
+  const fname = document.getElementById("fname").value || "arquivo.apk";
+  const fsize = document.getElementById("fsize").value || "0 MB";
 
-  // UPLOAD
-  const storageRef = sRef(storage, "files/" + Date.now() + "_" + file.name);
-  await uploadBytes(storageRef, file);
-  const url = await getDownloadURL(storageRef);
-
-  // GERA LINK ÚNICO
+  /* 🔥 SALVA NO FIREBASE (LINK ÚNICO) */
   const linkRef = push(ref(db, "links"));
   await set(linkRef, {
-    name: file.name,
-    url: url,
+    title: title,
+    name: fname,
+    size: fsize,
     clicks: 0,
     createdAt: Date.now()
   });
 
-  // VAI PARA CONCLUIR
+  /* 🔥 REDIRECIONA */
   window.location.href = "concluir.html?id=" + linkRef.key;
 };
 </script>
