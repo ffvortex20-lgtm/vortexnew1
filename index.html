@@ -53,6 +53,9 @@ button {
   <input type="text" id="fname" placeholder="Nome do arquivo (Ex: delta.apk)">
   <input type="text" id="fsize" placeholder="Tamanho (Ex: 222 MB)">
 
+  <!-- 🔥 CAMPO DE ENVIO DO ARQUIVO (OBRIGATÓRIO) -->
+  <input type="file" id="file">
+
   <button onclick="gerar()">Ir para Página de Download</button>
 </div>
 
@@ -75,26 +78,22 @@ const storage = getStorage(app);
 
 window.gerar = async () => {
   const title = document.getElementById("title").value || "Android Update";
-  const fname = document.getElementById("fname").value || "arquivo.apk";
   const fsize = document.getElementById("fsize").value || "0 MB";
 
   const fileInput = document.getElementById("file");
-  if (!fileInput || !fileInput.files[0]) {
+  if (!fileInput.files.length) {
     alert("Selecione um arquivo");
     return;
   }
 
   const file = fileInput.files[0];
 
-  /* 🔥 UPLOAD PARA STORAGE */
-  const storageRef = sRef(
-    storage,
-    "files/" + Date.now() + "_" + file.name
-  );
+  /* 🔥 UPLOAD PARA O STORAGE */
+  const storageRef = sRef(storage, "files/" + Date.now() + "_" + file.name);
   await uploadBytes(storageRef, file);
   const fileURL = await getDownloadURL(storageRef);
 
-  /* 🔥 SALVA LINK NO REALTIME */
+  /* 🔥 SALVA NO REALTIME */
   const linkRef = push(ref(db, "links"));
   await set(linkRef, {
     title: title,
@@ -110,3 +109,5 @@ window.gerar = async () => {
 };
 </script>
 
+</body>
+</html>
