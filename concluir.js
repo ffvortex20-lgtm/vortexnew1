@@ -1,22 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Download</title>
+<style>
+body{margin:0;background:#0b0e14;color:#fff;font-family:Arial;overflow:hidden}
+.box{position:relative;z-index:2;margin:100px auto;background:#161b22;
+padding:30px;border-radius:12px;max-width:400px;text-align:center}
+a{display:block;margin-top:20px;padding:12px;background:#238636;color:#fff;
+text-decoration:none;border-radius:8px;font-weight:bold}
+canvas{position:fixed;top:0;left:0;z-index:1}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="box">
+  <h2 id="nome">Arquivo</h2>
+  <a id="download" href="#">DOWNLOAD</a>
+</div>
+
+<script type="module">
+import "./firebase.js";
 import { db } from "./firebase.js";
-import { ref, get, update }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import {
+  ref, get, update
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const id = new URLSearchParams(location.search).get("id");
-const r = ref(db,"links/"+id);
-const s = await get(r);
+const linkRef = ref(db, "links/" + id);
 
-if(!s.exists()){
-  alert("Link inválido");
-  location.href="index.html";
-}
+const snap = await get(linkRef);
+const d = snap.val();
 
-const d = s.val();
-document.getElementById("title").innerText = d.title;
-document.getElementById("icon").src =
- d.photoUrl || "https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg";
+document.getElementById("nome").innerText = d.name;
+const btn = document.getElementById("download");
+btn.href = d.url;
 
-window.baixar = async ()=>{
-  await update(r,{clicks:(d.clicks||0)+1});
-  location.href = d.fileUrl;
+btn.onclick = () => {
+  update(linkRef, { clicks: (d.clicks || 0) + 1 });
 };
+</script>
+
+<script>
+// PARTÍCULAS SNOW
+const c=document.getElementById("bg"),x=c.getContext("2d");
+c.width=innerWidth;c.height=innerHeight;
+let p=[...Array(120)].map(()=>({x:Math.random()*c.width,y:Math.random()*c.height}));
+function draw(){
+x.clearRect(0,0,c.width,c.height);
+p.forEach(a=>{
+a.y+=1;if(a.y>c.height)a.y=0;
+x.fillStyle="red";x.fillRect(a.x,a.y,2,2);
+x.strokeStyle="white";x.beginPath();
+x.moveTo(a.x,a.y);x.lineTo(a.x+5,a.y+5);x.stroke();
+});
+requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+</body>
+</html>
