@@ -1,32 +1,88 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Configurar Download</title>
-    <style>
-        body { background: #0d1117; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: #161b22; padding: 25px; border-radius: 10px; border: 1px solid #30363d; width: 320px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #238636; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #2ea043; }
-    </style>
-</head>
-<body>
-    <div class="box">
-        <h3>Configurar Página</h3>
-        <input type="text" id="title" placeholder="Título (Ex: Delta V702)">
-        <input type="text" id="fname" placeholder="Nome exato do arquivo (Ex: delta.apk)">
-        <input type="text" id="fsize" placeholder="Tamanho (Ex: 222.31 MB)">
-        <button onclick="gerar()">Ir para Página de Download</button>
-    </div>
+<meta charset="UTF-8">
+<title>Configurar Download</title>
 
-    <script>
-        function gerar() {
-            localStorage.setItem('cfg_title', document.getElementById('title').value);
-            localStorage.setItem('cfg_name', document.getElementById('fname').value);
-            localStorage.setItem('cfg_size', document.getElementById('fsize').value);
+<style>
+body{
+    background:#0d1117;
+    color:white;
+    font-family:sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0
+}
+.box{
+    background:#161b22;
+    padding:25px;
+    border-radius:10px;
+    border:1px solid #30363d;
+    width:340px
+}
+input,button{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:5px;
+    border:1px solid #30363d;
+    background:#0d1117;
+    color:white;
+    box-sizing:border-box
+}
+button{
+    background:#238636;
+    border:none;
+    font-weight:bold;
+    cursor:pointer
+}
+button:hover{background:#2ea043}
+</style>
+</head>
+
+<body>
+<div class="box">
+    <h3>Configurar Página</h3>
+
+    <input type="text" id="title" placeholder="Título (Ex: Delta V702)">
+    <input type="file" id="file">
+    <input type="file" id="photo" accept="image/*">
+
+    <button onclick="gerar()">Ir para Página de Download</button>
+</div>
+
+<script>
+function gerar(){
+    const fileInput = document.getElementById("file").files[0];
+    const photoInput = document.getElementById("photo").files[0];
+
+    if(!fileInput){
+        alert("Selecione um arquivo ou APK");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        sessionStorage.setItem("fileData", reader.result);
+        sessionStorage.setItem("fileName", fileInput.name);
+        sessionStorage.setItem("fileSize", (fileInput.size / 1024 / 1024).toFixed(2) + " MB");
+        sessionStorage.setItem("title", document.getElementById("title").value);
+
+        if(photoInput){
+            const imgReader = new FileReader();
+            imgReader.onload = () => {
+                sessionStorage.setItem("photoData", imgReader.result);
+                window.location.href = "concluir.html";
+            };
+            imgReader.readAsDataURL(photoInput);
+        } else {
             window.location.href = "concluir.html";
         }
-    </script>
+    };
+    reader.readAsDataURL(fileInput);
+}
+</script>
 </body>
 </html>
