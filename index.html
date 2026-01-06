@@ -1,110 +1,32 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vortex Links • Gerar</title>
-
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:radial-gradient(circle at top,#6a00ff,#12001f);min-height:100vh;color:#fff}
-.container{max-width:700px;margin:80px auto;background:rgba(0,0,0,.55);border-radius:16px;padding:30px;box-shadow:0 0 30px #9b4dff}
-h1{text-align:center;color:#d6b3ff;text-shadow:0 0 10px #a855ff}
-.box{background:#140022;border-radius:14px;padding:20px;text-align:center}
-input{width:100%;padding:14px;border-radius:10px;border:none;margin-bottom:12px}
-button{
-  width:100%;
-  padding:14px;
-  border-radius:10px;
-  border:none;
-  font-weight:bold;
-  background:linear-gradient(45deg,#8f3bff,#c77dff);
-  color:#fff;
-  cursor:pointer;
-  box-shadow:0 0 15px #9b4dff;
-  display:none
-}
-.footer{text-align:center;margin-top:15px;font-size:14px;color:#ccc}
-</style>
+    <meta charset="UTF-8">
+    <title>Configurar Download</title>
+    <style>
+        body { background: #0d1117; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: #161b22; padding: 25px; border-radius: 10px; border: 1px solid #30363d; width: 320px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #238636; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2ea043; }
+    </style>
 </head>
-
 <body>
-<div class="container">
-<h1>GERAR LINK</h1>
+    <div class="box">
+        <h3>Configurar Página</h3>
+        <input type="text" id="title" placeholder="Título (Ex: Delta V702)">
+        <input type="text" id="fname" placeholder="Nome exato do arquivo (Ex: delta.apk)">
+        <input type="text" id="fsize" placeholder="Tamanho (Ex: 222.31 MB)">
+        <button onclick="gerar()">Ir para Página de Download</button>
+    </div>
 
-<div class="box">
-  <input id="link" placeholder="🔗 Link de download (obrigatório)">
-  <input id="canal" placeholder="📢 Canal (opcional)">
-  <input id="video" placeholder="🎬 Vídeo (YouTube ou MP4)">
-  <input id="creator" placeholder="👤 Nome do criador">
-  <button id="enviar">🚀 Gerar Link Curto</button>
-</div>
-
-<div class="footer">dev: vortex</div>
-</div>
-
-<!-- 🔥 FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<script>
-/* =====================================================
-   🔥 FIREBASE CONFIG
-===================================================== */
-firebase.initializeApp({
-  apiKey: "AIzaSyAx-jIvw9lqykjroKMWzRTEOlZ41Xk6-bY",
-  databaseURL: "https://vortexxxxxxxxx-5159f-default-rtdb.firebaseio.com",
-  projectId: "vortexxxxxxxxx-5159f"
-});
-const db = firebase.database();
-
-/* =====================================================
-   🎯 ELEMENTOS
-===================================================== */
-const link    = document.getElementById("link");
-const canal   = document.getElementById("canal");
-const video   = document.getElementById("video");
-const creator = document.getElementById("creator");
-const enviar  = document.getElementById("enviar");
-
-/* =====================================================
-   🆔 GERAR ID CURTO
-===================================================== */
-function gerarID(){
-  return Math.random().toString(36).substring(2,8);
-}
-
-/* =====================================================
-   👀 MOSTRAR BOTÃO
-===================================================== */
-link.oninput = () => {
-  enviar.style.display = link.value.trim() ? "block" : "none";
-};
-
-/* =====================================================
-   🚀 GERAR LINK
-===================================================== */
-enviar.onclick = () => {
-  const download = link.value.trim();
-  if(!download){
-    alert("Informe o link de download");
-    return;
-  }
-
-  const id = gerarID();
-
-  db.ref("links/" + id).set({
-    l: download,
-    c: canal.value.trim(),
-    v: video.value.trim(),
-    n: creator.value.trim() || "Vortex",
-    clicks: 0,
-    created: Date.now()
-  });
-
-  // 🔗 REDIRECIONA PARA LINK CURTO
-  location.href = "concluir.html#" + id;
-};
-</script>
+    <script>
+        function gerar() {
+            localStorage.setItem('cfg_title', document.getElementById('title').value);
+            localStorage.setItem('cfg_name', document.getElementById('fname').value);
+            localStorage.setItem('cfg_size', document.getElementById('fsize').value);
+            window.location.href = "concluir.html";
+        }
+    </script>
 </body>
 </html>
