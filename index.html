@@ -5,7 +5,7 @@
 <title>Vortex Links</title>
 <style>
 body{background:#0d1117;color:#fff;font-family:Arial;padding:20px}
-.box{background:#161b22;padding:20px;border-radius:10px;max-width:400px}
+.box{background:#161b22;padding:20px;border-radius:10px;max-width:420px}
 input,button{width:100%;margin-top:10px;padding:10px}
 .card{background:#21262d;padding:10px;margin-top:10px;border-radius:8px}
 </style>
@@ -15,25 +15,35 @@ input,button{width:100%;margin-top:10px;padding:10px}
 <div class="box">
   <h3>Gerar Link</h3>
   <input type="file" id="file">
-  <button onclick="gerar()">GERAR LINK</button>
+  <button id="btn">GERAR LINK</button>
 </div>
 
-<h3>Links Criados</h3>
+<h3>Links Gerados</h3>
 <div id="lista"></div>
 
 <script type="module">
-import "./firebase.js";
-import { db, storage } from "./firebase.js";
-import {
-  ref, push, set, onValue, remove
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import {
-  ref as sRef, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, remove } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+/* 🔥 SUA FIREBASE */
+const firebaseConfig = {
+  apiKey: "AIzaSyAx-jIvw9lqykjroKMWzRTEOlZ41Xk6-bY",
+  databaseURL: "https://vortexxxxxxxxx-5159f-default-rtdb.firebaseio.com",
+  projectId: "vortexxxxxxxxx-5159f",
+  storageBucket: "vortexxxxxxxxx-5159f.firebasestorage.app"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const storage = getStorage(app);
+
+const btn = document.getElementById("btn");
 const lista = document.getElementById("lista");
 
-window.gerar = async () => {
+btn.onclick = async () => {
   const file = document.getElementById("file").files[0];
   if (!file) return alert("Selecione um arquivo");
 
@@ -44,11 +54,11 @@ window.gerar = async () => {
   const linkRef = push(ref(db, "links"));
   await set(linkRef, {
     name: file.name,
-    url,
+    url: url,
     clicks: 0
   });
 
-  alert("LINK GERADO!");
+  alert("✅ LINK GERADO COM SUCESSO");
 };
 
 onValue(ref(db, "links"), snap => {
