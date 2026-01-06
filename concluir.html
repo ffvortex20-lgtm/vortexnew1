@@ -12,6 +12,19 @@ body {
   margin: 0;
   overflow: hidden;
 }
+.nav-home {
+  background: #007bff;
+  padding: 8px 25px;
+  border-radius: 20px;
+  margin: 40px auto;
+  width: max-content;
+  font-weight: bold;
+}
+h1 {
+  font-size: 50px;
+  margin: 20px 0 40px;
+  text-align: center;
+}
 .main-card {
   background: rgba(255,255,255,0.03);
   border: 1px solid #30363d;
@@ -19,10 +32,15 @@ body {
   width: 90%;
   max-width: 900px;
   padding: 40px;
-  margin: 100px auto;
+  margin: auto;
   text-align: center;
   position: relative;
   z-index: 2;
+}
+.filename {
+  font-size: 20px;
+  font-weight: bold;
+  color: #58a6ff;
 }
 .btn-dl {
   background: #007bff;
@@ -32,12 +50,11 @@ body {
   text-decoration: none;
   font-weight: bold;
   display: inline-block;
-  margin-top: 20px;
+  margin-top: 25px;
 }
 canvas {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   z-index: 1;
 }
 </style>
@@ -47,15 +64,21 @@ canvas {
 
 <canvas id="bg"></canvas>
 
+<div class="nav-home">Home</div>
+<h1>Android Updates</h1>
+
 <div class="main-card">
-  <h1 id="nome">Arquivo</h1>
-  <a id="download" class="btn-dl" href="#">Download</a>
+  <div id="displayTitle">Latest Android Version</div>
+  <p class="filename" id="displayFile">arquivo.apk</p>
+  <p>Size: <span id="displaySize">0 MB</span></p>
+  <a id="dlLink" class="btn-dl" href="#">Download</a>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+/* 🔥 SUA FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyAx-jIvw9lqykjroKMWzRTEOlZ41Xk6-bY",
   databaseURL: "https://vortexxxxxxxxx-5159f-default-rtdb.firebaseio.com",
@@ -66,24 +89,28 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const id = new URLSearchParams(location.search).get("id");
-const linkRef = ref(db, "links/" + id);
+const snap = await get(ref(db, "links/" + id));
+const d = snap.val();
 
-const snap = await get(linkRef);
-const data = snap.val();
+document.getElementById("displayTitle").innerText = d.title;
+document.getElementById("displayFile").innerText = d.name;
+document.getElementById("displaySize").innerText = d.size;
 
-document.getElementById("nome").innerText = data.name;
-const btn = document.getElementById("download");
-btn.href = data.url;
+const btn = document.getElementById("dlLink");
+btn.href = d.name;
+btn.setAttribute("download", d.name);
 
 btn.onclick = () => {
-  update(linkRef, { clicks: (data.clicks || 0) + 1 });
+  update(ref(db, "links/" + id), {
+    clicks: (d.clicks || 0) + 1
+  });
 };
 </script>
 
 <script>
 // ❄️ SNOW VERMELHO + LINHA BRANCA
 const c = document.getElementById("bg");
-const ctx = c.getContext("2d");
+const x = c.getContext("2d");
 c.width = innerWidth;
 c.height = innerHeight;
 
@@ -93,17 +120,17 @@ let p = [...Array(120)].map(() => ({
 }));
 
 function draw() {
-  ctx.clearRect(0,0,c.width,c.height);
+  x.clearRect(0,0,c.width,c.height);
   p.forEach(a => {
     a.y += 1;
     if (a.y > c.height) a.y = 0;
-    ctx.fillStyle = "red";
-    ctx.fillRect(a.x,a.y,2,2);
-    ctx.strokeStyle = "white";
-    ctx.beginPath();
-    ctx.moveTo(a.x,a.y);
-    ctx.lineTo(a.x+6,a.y+6);
-    ctx.stroke();
+    x.fillStyle = "red";
+    x.fillRect(a.x,a.y,2,2);
+    x.strokeStyle = "white";
+    x.beginPath();
+    x.moveTo(a.x,a.y);
+    x.lineTo(a.x+6,a.y+6);
+    x.stroke();
   });
   requestAnimationFrame(draw);
 }
