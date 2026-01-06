@@ -1,114 +1,140 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Android Updates - Delta</title>
-    <style>
-        body { background-color: #0b0e14; color: white; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        .nav-home { background: #007bff; padding: 8px 25px; border-radius: 20px; margin-top: 40px; font-weight: bold; cursor: pointer; }
-        h1 { font-size: 50px; margin: 20px 0 40px 0; letter-spacing: 1px; }
-        
-        .main-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid #30363d;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 900px;
-            padding: 40px;
-            text-align: center;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Android Updates</title>
 
-        .update-title { font-size: 22px; font-weight: bold; margin-bottom: 30px; display: block; color: #e6edf3; }
-
-        .file-box {
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 30px;
-            text-align: left;
-        }
-
-        .info { display: flex; align-items: center; }
-        .info img { width: 45px; margin-right: 20px; }
-        .filename { font-size: 18px; font-weight: bold; display: block; color: #58a6ff; }
-        .metadata { color: #8b949e; font-size: 14px; margin-top: 4px; }
-
-        .btn-dl {
-            background: #007bff;
-            color: white;
-            padding: 12px 35px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        /* Rodapé com "Ads" igual ao print */
-        .footer-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            width: 90%;
-            max-width: 900px;
-            margin-top: 30px;
-        }
-        .ad-item { background: white; border-radius: 4px; height: 180px; overflow: hidden; position: relative; }
-        .ad-blue { background: #f8f9fa; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .ad-blue h2 { color: #007bff; margin: 0; font-size: 28px; }
-    </style>
+<style>
+body{
+    margin:0;
+    color:white;
+    font-family:Arial;
+    background:#0b0e14;
+    overflow:hidden
+}
+canvas{
+    position:fixed;
+    inset:0;
+    z-index:-1
+}
+.main{
+    max-width:900px;
+    margin:80px auto;
+    background:rgba(255,255,255,.03);
+    border:1px solid #30363d;
+    border-radius:15px;
+    padding:40px
+}
+.file-box{
+    background:#0d1117;
+    border:1px solid #30363d;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px
+}
+.info{
+    display:flex;
+    align-items:center
+}
+.info img{
+    width:50px;
+    height:50px;
+    object-fit:cover;
+    border-radius:8px;
+    margin-right:15px
+}
+.btn{
+    background:#007bff;
+    color:white;
+    padding:12px 30px;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer;
+    border:none
+}
+</style>
 </head>
+
 <body>
 
-    <div class="nav-home">Home</div>
-    <h1>Android Updates</h1>
+<canvas id="bg"></canvas>
 
-    <div class="main-card">
-        <span class="update-title" id="displayTitle">Latest Android Version</span>
-        
-        <div class="file-box">
-            <div class="info">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg" alt="android">
-                <div>
-                    <span class="filename" id="displayFile">arquivo.apk</span>
-                    <span class="metadata">Size: <span id="displaySize">0 MB</span> | Modified: Jan 06, 2026</span>
-                </div>
+<div class="main">
+    <h2 id="title">Download</h2>
+
+    <div class="file-box">
+        <div class="info">
+            <img id="icon" src="">
+            <div>
+                <b id="fname"></b><br>
+                <small id="fsize"></small>
             </div>
-            <a href="#" id="dlLink" class="btn-dl">Download</a>
         </div>
+        <button class="btn" onclick="download()">Download</button>
     </div>
+</div>
 
-    <div class="footer-grid">
-        <div class="ad-item ad-blue">
-            <div style="font-size: 40px; color: #007bff; border: 3px solid; padding: 5px 15px; margin-bottom: 10px;">⬇</div>
-            <h2 style="font-size: 20px;">DOWNLOAD</h2>
-            <p style="font-size: 12px; margin-top: 5px;">Baixe Agora Grátis</p>
-        </div>
-        <div class="ad-item">
-            <img src="https://api.placeholder.com/300/200?text=Flor+Colorida" style="width:100%; height:100%; object-fit:cover;">
-        </div>
-        <div class="ad-item">
-            <img src="https://api.placeholder.com/300/200?text=Save+Big" style="width:100%; height:100%; object-fit:cover;">
-        </div>
-    </div>
+<script>
+const fileData = sessionStorage.getItem("fileData");
+const fileName = sessionStorage.getItem("fileName");
+const fileSize = sessionStorage.getItem("fileSize");
+const title = sessionStorage.getItem("title");
+const photo = sessionStorage.getItem("photoData");
 
-    <script>
-        // Pega as infos que você digitou no index
-        const nome = localStorage.getItem('cfg_name') || 'arquivo.apk';
-        const titulo = localStorage.getItem('cfg_title') || 'Latest Android Version';
-        const tamanho = localStorage.getItem('cfg_size') || '0 MB';
+document.getElementById("title").innerText = title || "Download Disponível";
+document.getElementById("fname").innerText = fileName;
+document.getElementById("fsize").innerText = fileSize;
+document.getElementById("icon").src = photo || "https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg";
 
-        document.getElementById('displayTitle').innerText = `${titulo} (Auto Starts Download, No Need To Press Download!)`;
-        document.getElementById('displayFile').innerText = nome;
-        document.getElementById('displaySize').innerText = tamanho;
-        
-        // O link de download aponta para o arquivo na mesma pasta do GitHub
-        const link = document.getElementById('dlLink');
-        link.href = nome; 
-        link.setAttribute('download', nome);
-    </script>
+function download(){
+    const a = document.createElement("a");
+    a.href = fileData;
+    a.download = fileName;
+    a.click();
+}
+
+/* PARTICULAS SNOW VERMELHO + LINHAS BRANCAS */
+const c = document.getElementById("bg");
+const ctx = c.getContext("2d");
+c.width = innerWidth;
+c.height = innerHeight;
+
+let p = Array.from({length:80},()=>({
+    x:Math.random()*c.width,
+    y:Math.random()*c.height,
+    r:Math.random()*3+1,
+    vy:Math.random()+0.5
+}));
+
+function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    p.forEach(e=>{
+        ctx.fillStyle="red";
+        ctx.beginPath();
+        ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
+        ctx.fill();
+        e.y+=e.vy;
+        if(e.y>c.height)e.y=0;
+    });
+
+    for(let i=0;i<p.length;i++){
+        for(let j=i+1;j<p.length;j++){
+            let d=Math.hypot(p[i].x-p[j].x,p[i].y-p[j].y);
+            if(d<120){
+                ctx.strokeStyle="rgba(255,255,255,.15)";
+                ctx.beginPath();
+                ctx.moveTo(p[i].x,p[i].y);
+                ctx.lineTo(p[j].x,p[j].y);
+                ctx.stroke();
+            }
+        }
+    }
+    requestAnimationFrame(draw);
+}
+draw();
+</script>
 </body>
 </html>
