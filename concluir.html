@@ -1,215 +1,114 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vortex Links • Concluir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android Updates - Delta</title>
+    <style>
+        body { background-color: #0b0e14; color: white; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .nav-home { background: #007bff; padding: 8px 25px; border-radius: 20px; margin-top: 40px; font-weight: bold; cursor: pointer; }
+        h1 { font-size: 50px; margin: 20px 0 40px 0; letter-spacing: 1px; }
+        
+        .main-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #30363d;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 900px;
+            padding: 40px;
+            text-align: center;
+        }
 
-<style>
-/* ===== RESET ===== */
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+        .update-title { font-size: 22px; font-weight: bold; margin-bottom: 30px; display: block; color: #e6edf3; }
 
-/* ===== BODY ===== */
-body{
-  background:radial-gradient(circle at top,#6a00ff,#12001f);
-  min-height:100vh;
-  color:#fff
-}
+        .file-box {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 30px;
+            text-align: left;
+        }
 
-/* ===== LAYOUT ===== */
-.container{
-  max-width:800px;
-  margin:60px auto;
-  background:rgba(0,0,0,.55);
-  border-radius:16px;
-  padding:30px;
-  box-shadow:0 0 30px #9b4dff
-}
+        .info { display: flex; align-items: center; }
+        .info img { width: 45px; margin-right: 20px; }
+        .filename { font-size: 18px; font-weight: bold; display: block; color: #58a6ff; }
+        .metadata { color: #8b949e; font-size: 14px; margin-top: 4px; }
 
-h1{
-  text-align:center;
-  margin-bottom:20px;
-  color:#d6b3ff;
-  text-shadow:0 0 10px #a855ff
-}
+        .btn-dl {
+            background: #007bff;
+            color: white;
+            padding: 12px 35px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        }
 
-.box{
-  background:rgba(20,0,40,.8);
-  border-radius:14px;
-  padding:20px;
-  box-shadow:0 0 15px #7a2bff;
-  text-align:center
-}
-
-/* ===== VIDEO ===== */
-.videoBox{
-  margin-top:10px;
-  border-radius:12px;
-  overflow:hidden;
-  background:#000
-}
-.videoBox iframe,
-.videoBox video{
-  width:100%;
-  height:300px;
-  border:none
-}
-
-/* ===== INFO ===== */
-.timer{font-size:18px;margin:15px 0;color:#ffd6ff}
-.result{
-  word-break:break-all;
-  background:#140022;
-  padding:12px;
-  border-radius:10px;
-  border:1px dashed #9b4dff;
-  margin-bottom:15px
-}
-.error{
-  color:#ffb3c1;
-  margin-top:10px;
-  display:none
-}
-
-/* ===== BUTTONS ===== */
-button{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  border-radius:10px;
-  border:none;
-  font-size:15px;
-  font-weight:bold;
-  cursor:pointer;
-  color:#fff;
-  background:linear-gradient(45deg,#8f3bff,#c77dff);
-  box-shadow:0 0 15px #9b4dff;
-  display:none
-}
-
-/* ===== FOOTER ===== */
-.footer{
-  text-align:center;
-  margin-top:15px;
-  font-size:14px;
-  color:#e0ccff
-}
-</style>
+        /* Rodapé com "Ads" igual ao print */
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 90%;
+            max-width: 900px;
+            margin-top: 30px;
+        }
+        .ad-item { background: white; border-radius: 4px; height: 180px; overflow: hidden; position: relative; }
+        .ad-blue { background: #f8f9fa; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .ad-blue h2 { color: #007bff; margin: 0; font-size: 28px; }
+    </style>
 </head>
 <body>
 
-<div class="container">
-<h1>DESBLOQUEANDO LINK</h1>
+    <div class="nav-home">Home</div>
+    <h1>Android Updates</h1>
 
-<div class="box">
-  <div class="videoBox" id="videoBox"></div>
-  <div class="timer">Aguarde <span id="t">5</span>s...</div>
-  <div class="result" id="res"></div>
-  <div class="error" id="err">Link inválido ou inexistente.</div>
-  <button id="subscribe">🔔 Visitar canal</button>
-  <button id="baixar">⬇️ Baixar</button>
-</div>
+    <div class="main-card">
+        <span class="update-title" id="displayTitle">Latest Android Version</span>
+        
+        <div class="file-box">
+            <div class="info">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg" alt="android">
+                <div>
+                    <span class="filename" id="displayFile">arquivo.apk</span>
+                    <span class="metadata">Size: <span id="displaySize">0 MB</span> | Modified: Jan 06, 2026</span>
+                </div>
+            </div>
+            <a href="#" id="dlLink" class="btn-dl">Download</a>
+        </div>
+    </div>
 
-<div class="footer">
-  Cliques: <span id="c">0</span> • Criador: <span id="dono">-</span> • dev: vortex
-</div>
-</div>
+    <div class="footer-grid">
+        <div class="ad-item ad-blue">
+            <div style="font-size: 40px; color: #007bff; border: 3px solid; padding: 5px 15px; margin-bottom: 10px;">⬇</div>
+            <h2 style="font-size: 20px;">DOWNLOAD</h2>
+            <p style="font-size: 12px; margin-top: 5px;">Baixe Agora Grátis</p>
+        </div>
+        <div class="ad-item">
+            <img src="https://api.placeholder.com/300/200?text=Flor+Colorida" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div class="ad-item">
+            <img src="https://api.placeholder.com/300/200?text=Save+Big" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+    </div>
 
-<!-- ===== FIREBASE ===== -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // Pega as infos que você digitou no index
+        const nome = localStorage.getItem('cfg_name') || 'arquivo.apk';
+        const titulo = localStorage.getItem('cfg_title') || 'Latest Android Version';
+        const tamanho = localStorage.getItem('cfg_size') || '0 MB';
 
-<script>
-firebase.initializeApp({
-  apiKey: "AIzaSyAx-jIvw9lqykjroKMWzRTEOlZ41Xk6-bY",
-  databaseURL: "https://vortexxxxxxxxx-5159f-default-rtdb.firebaseio.com",
-  projectId: "vortexxxxxxxxx-5159f"
-});
-
-const db = firebase.database();
-
-const t = document.getElementById('t');
-const c = document.getElementById('c');
-const baixar = document.getElementById('baixar');
-const sub = document.getElementById('subscribe');
-const dono = document.getElementById('dono');
-const res = document.getElementById('res');
-const box = document.getElementById('videoBox');
-const err = document.getElementById('err');
-
-/* ========= PEGAR ID ========= */
-let id = location.hash.slice(1);
-
-if (!id) {
-  err.style.display = 'block';
-  err.textContent = 'Link inválido ou inexistente.';
-} else {
-  carregarLink(id);
-}
-
-function carregarLink(id){
-  const ref = db.ref('links/' + id);
-
-  ref.once('value').then(snap=>{
-    if(!snap.exists()){
-      err.style.display = 'block';
-      err.textContent = 'Link removido ou inexistente.';
-      return;
-    }
-
-    const data = snap.val();
-
-    dono.textContent = data.n || 'Vortex';
-    res.textContent = location.origin + location.pathname + '#' + id;
-
-    if(data.v) carregarVideo(data.v);
-
-    if(data.c){
-      sub.style.display = 'block';
-      sub.onclick = () => window.open(data.c,'_blank');
-    }
-
-    ref.child('clicks').on('value', s=>{
-      c.textContent = s.val() || 0;
-    });
-
-    iniciarTimer(ref, data.l);
-  });
-}
-
-/* ========= VIDEO ========= */
-function carregarVideo(v){
-  if(v.includes('youtube') || v.includes('youtu.be')){
-    let vid = v.includes('v=')
-      ? v.split('v=')[1].split('&')[0]
-      : v.split('youtu.be/')[1];
-
-    box.innerHTML = `
-      <iframe src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1"
-      allow="autoplay" allowfullscreen></iframe>`;
-  } else {
-    box.innerHTML = `<video src="${v}" controls autoplay muted></video>`;
-  }
-}
-
-/* ========= TIMER ========= */
-function iniciarTimer(ref, link){
-  let time = 5;
-  const timer = setInterval(()=>{
-    t.textContent = time;
-    time--;
-
-    if(time < 0){
-      clearInterval(timer);
-
-      if(link){
-        baixar.style.display = 'block';
-        baixar.onclick = ()=>{
-          ref.child('clicks').transaction(v => (v||0)+1);
-          window.location.href = link.startsWith('http') ? link : 'https://' + link;
-        };
-      }
-    }
-  },1000);
-}
-</script>
+        document.getElementById('displayTitle').innerText = `${titulo} (Auto Starts Download, No Need To Press Download!)`;
+        document.getElementById('displayFile').innerText = nome;
+        document.getElementById('displaySize').innerText = tamanho;
+        
+        // O link de download aponta para o arquivo na mesma pasta do GitHub
+        const link = document.getElementById('dlLink');
+        link.href = nome; 
+        link.setAttribute('download', nome);
+    </script>
+</body>
+</html>
