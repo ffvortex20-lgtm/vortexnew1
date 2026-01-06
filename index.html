@@ -2,39 +2,74 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Vortex • Painel</title>
-
+<title>Vortex Links</title>
 <style>
-body{margin:0;background:#0d1117;color:#fff;font-family:Arial}
-.box{max-width:900px;margin:40px auto;padding:20px}
-.card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;margin-bottom:20px}
-input,button{width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#fff}
-button{background:#238636;border:none;font-weight:bold;cursor:pointer}
-button:hover{background:#2ea043}
-.link{border:1px solid #30363d;padding:10px;border-radius:6px;margin-top:10px}
-a{color:#58a6ff;text-decoration:none}
-small{color:#8b949e}
+body{background:#0d1117;color:#fff;font-family:Arial;padding:20px}
+.box{background:#161b22;padding:20px;border-radius:10px;max-width:400px}
+input,button{width:100%;margin-top:10px;padding:10px}
+.card{background:#21262d;padding:10px;margin-top:10px;border-radius:8px}
 </style>
 </head>
-
 <body>
+
 <div class="box">
-
-<div class="card">
-<h2>Gerar Link</h2>
-<input id="title" placeholder="Título">
-<input id="file" type="file">
-<input id="photo" type="file" accept="image/*">
-<button onclick="gerar()">Gerar</button>
+  <h3>Gerar Link</h3>
+  <input type="file" id="file">
+  <button onclick="gerar()">GERAR LINK</button>
 </div>
 
-<div class="card">
-<h2>Links Gerados</h2>
+<h3>Links Criados</h3>
 <div id="lista"></div>
-</div>
 
-</div>
+<script type="module">
+import "./firebase.js";
+import { db, storage } from "./firebase.js";
+import {
+  ref, push, set, onValue, remove
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import {
+  ref as sRef, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-<script type="module" src="./index.js"></script>
+const lista = document.getElementById("lista");
+
+window.gerar = async () => {
+  const file = document.getElementById("file").files[0];
+  if (!file) return alert("Selecione um arquivo");
+
+  const fileRef = sRef(storage, "files/" + Date.now() + "_" + file.name);
+  await uploadBytes(fileRef, file);
+  const url = await getDownloadURL(fileRef);
+
+  const linkRef = push(ref(db, "links"));
+  await set(linkRef, {
+    name: file.name,
+    url,
+    clicks: 0
+  });
+
+  alert("LINK GERADO!");
+};
+
+onValue(ref(db, "links"), snap => {
+  lista.innerHTML = "";
+  snap.forEach(c => {
+    const d = c.val();
+    lista.innerHTML += `
+      <div class="card">
+        <b>${d.name}</b><br>
+        Cliques: ${d.clicks}<br>
+        <a href="concluir.html?id=${c.key}" target="_blank">Abrir</a>
+        <button onclick="remover('${c.key}')">Remover</button>
+      </div>
+    `;
+  });
+});
+
+window.remover = id => {
+  remove(ref(db, "links/" + id));
+};
+</script>
+
 </body>
 </html>
