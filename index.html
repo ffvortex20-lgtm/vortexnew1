@@ -2,31 +2,55 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Vortex Links</title>
+<title>Configurar Download</title>
+
 <style>
-body{background:#0d1117;color:#fff;font-family:Arial;padding:20px}
-.box{background:#161b22;padding:20px;border-radius:10px;max-width:420px}
-input,button{width:100%;margin-top:10px;padding:10px}
-.card{background:#21262d;padding:10px;margin-top:10px;border-radius:8px}
+body {
+  background: #0d1117;
+  color: white;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+.box {
+  background: #161b22;
+  padding: 25px;
+  border-radius: 10px;
+  border: 1px solid #30363d;
+  width: 320px;
+}
+input, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+button {
+  background: #238636;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
 </style>
 </head>
+
 <body>
 
 <div class="box">
-  <h3>Gerar Link</h3>
-  <input type="file" id="file">
-  <button id="btn">GERAR LINK</button>
-</div>
+  <h3>Configurar Página</h3>
 
-<h3>Links Gerados</h3>
-<div id="lista"></div>
+  <input type="file" id="file">
+  <button id="gerar">Ir para Página de Download</button>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, set, onValue, remove } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 /* 🔥 SUA FIREBASE */
 const firebaseConfig = {
@@ -40,44 +64,29 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-const btn = document.getElementById("btn");
-const lista = document.getElementById("lista");
-
-btn.onclick = async () => {
+document.getElementById("gerar").onclick = async () => {
   const file = document.getElementById("file").files[0];
-  if (!file) return alert("Selecione um arquivo");
+  if (!file) {
+    alert("Selecione um arquivo");
+    return;
+  }
 
-  const fileRef = sRef(storage, "files/" + Date.now() + "_" + file.name);
-  await uploadBytes(fileRef, file);
-  const url = await getDownloadURL(fileRef);
+  // UPLOAD
+  const storageRef = sRef(storage, "files/" + Date.now() + "_" + file.name);
+  await uploadBytes(storageRef, file);
+  const url = await getDownloadURL(storageRef);
 
+  // GERA LINK ÚNICO
   const linkRef = push(ref(db, "links"));
   await set(linkRef, {
     name: file.name,
     url: url,
-    clicks: 0
+    clicks: 0,
+    createdAt: Date.now()
   });
 
-  alert("✅ LINK GERADO COM SUCESSO");
-};
-
-onValue(ref(db, "links"), snap => {
-  lista.innerHTML = "";
-  snap.forEach(c => {
-    const d = c.val();
-    lista.innerHTML += `
-      <div class="card">
-        <b>${d.name}</b><br>
-        Cliques: ${d.clicks}<br>
-        <a href="concluir.html?id=${c.key}" target="_blank">Abrir</a>
-        <button onclick="remover('${c.key}')">Remover</button>
-      </div>
-    `;
-  });
-});
-
-window.remover = id => {
-  remove(ref(db, "links/" + id));
+  // VAI PARA CONCLUIR
+  window.location.href = "concluir.html?id=" + linkRef.key;
 };
 </script>
 
