@@ -59,28 +59,48 @@ button {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 /* 🔥 SUA FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyAx-jIvw9lqykjroKMWzRTEOlZ41Xk6-bY",
   databaseURL: "https://vortexxxxxxxxx-5159f-default-rtdb.firebaseio.com",
-  projectId: "vortexxxxxxxxx-5159f"
+  projectId: "vortexxxxxxxxx-5159f",
+  storageBucket: "vortexxxxxxxxx-5159f.firebasestorage.app"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const storage = getStorage(app);
 
 window.gerar = async () => {
   const title = document.getElementById("title").value || "Android Update";
   const fname = document.getElementById("fname").value || "arquivo.apk";
   const fsize = document.getElementById("fsize").value || "0 MB";
 
-  /* 🔥 SALVA NO FIREBASE (LINK ÚNICO) */
+  const fileInput = document.getElementById("file");
+  if (!fileInput || !fileInput.files[0]) {
+    alert("Selecione um arquivo");
+    return;
+  }
+
+  const file = fileInput.files[0];
+
+  /* 🔥 UPLOAD PARA STORAGE */
+  const storageRef = sRef(
+    storage,
+    "files/" + Date.now() + "_" + file.name
+  );
+  await uploadBytes(storageRef, file);
+  const fileURL = await getDownloadURL(storageRef);
+
+  /* 🔥 SALVA LINK NO REALTIME */
   const linkRef = push(ref(db, "links"));
   await set(linkRef, {
     title: title,
-    name: fname,
+    name: file.name,
     size: fsize,
+    url: fileURL,
     clicks: 0,
     createdAt: Date.now()
   });
@@ -90,5 +110,3 @@ window.gerar = async () => {
 };
 </script>
 
-</body>
-</html>
