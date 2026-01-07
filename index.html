@@ -3,51 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Links Únicos</title>
+    <title>Painel Gerador</title>
     <style>
         body { background-color: #0b0e14; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: #161b22; padding: 30px; border-radius: 12px; border: 1px solid #30363d; width: 450px; }
-        h2 { text-align: center; color: #58a6ff; }
+        .container { background: #161b22; padding: 30px; border-radius: 12px; border: 1px solid #30363d; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { text-align: center; color: #58a6ff; margin-bottom: 20px; }
         label { font-size: 12px; color: #8b949e; display: block; margin-top: 10px; }
-        input { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; margin-top: 20px; border-radius: 6px; border: none; background: #238636; color: white; font-weight: bold; cursor: pointer; }
-        #resultado { margin-top: 20px; display: none; padding: 15px; background: #0d1117; border: 1px dashed #58a6ff; border-radius: 6px; word-break: break-all; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin-top: 20px; border-radius: 6px; border: none; background: #238636; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #2ea043; }
+        #resultado { margin-top: 20px; display: none; padding: 15px; background: #0d1117; border: 1px dashed #58a6ff; border-radius: 6px; }
+        #linkFinal { color: #58a6ff; font-size: 14px; word-break: break-all; margin: 10px 0; display: block; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Criar Novo Link Único</h2>
+        <h2>Gerar Link de Download</h2>
         
-        <label>Título (Ex: Delta V702)</label>
-        <input type="text" id="tit" placeholder="Título">
+        <label>Título da Versão</label>
+        <input type="text" id="tit" placeholder="Ex: Delta V702">
         
         <label>Nome do Arquivo</label>
-        <input type="text" id="nom" placeholder="Ex: mod.apk">
+        <input type="text" id="nom" placeholder="Ex: delta_v2.apk">
         
         <label>Tamanho</label>
-        <input type="text" id="tam" placeholder="Ex: 500 MB">
+        <input type="text" id="tam" placeholder="Ex: 1.5 GB">
         
-        <label>Link Direto do Arquivo (Download)</label>
-        <input type="url" id="l_d" placeholder="https://...">
+        <label>Link de Download (2GB+)</label>
+        <input type="url" id="l_d" placeholder="https://mediafire.com/...">
 
         <label>Link do Canal</label>
-        <input type="url" id="l_c" placeholder="https://youtube.com/@...">
+        <input type="url" id="l_c" placeholder="https://youtube.com/@seu_canal">
 
         <label>Link do Vídeo</label>
-        <input type="url" id="l_v" placeholder="Link do vídeo">
+        <input type="url" id="l_v" placeholder="Link do vídeo do YT">
 
-        <button onclick="gerarLinkCurto()">GERAR LINK PEQUENO</button>
+        <button onclick="gerarLinkCurto()">GERAR LINK ÚNICO</button>
 
         <div id="resultado">
-            <label>Seu link gerado:</label>
-            <p id="linkFinal" style="color: #58a6ff; font-size: 14px;"></p>
-            <button onclick="copiarLink()" style="background: #1f6feb; padding: 8px; margin-top: 5px;">COPIAR LINK</button>
+            <label>Link para seus usuários:</label>
+            <strong id="linkFinal"></strong>
+            <button onclick="copiarLink()" style="background: #1f6feb;">COPIAR LINK</button>
         </div>
     </div>
 
     <script>
         async function gerarLinkCurto() {
-            const base = window.location.href.replace('index.html', 'concluir.html');
+            // Pega a URL atual e troca index.html por concluir.html
+            let base = window.location.href.split('?')[0];
+            if (base.endsWith('index.html')) {
+                base = base.replace('index.html', 'concluir.html');
+            } else if (base.endsWith('/')) {
+                base = base + 'concluir.html';
+            } else {
+                base = base.substring(0, base.lastIndexOf('/') + 1) + 'concluir.html';
+            }
+
             const params = new URLSearchParams({
                 t: document.getElementById('tit').value,
                 n: document.getElementById('nom').value,
@@ -59,7 +70,6 @@
 
             const linkLongo = `${base}?${params.toString()}`;
             
-            // Usando a API do TinyURL para encurtar o link automaticamente
             try {
                 const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(linkLongo)}`);
                 const linkCurto = await res.text();
@@ -68,14 +78,12 @@
             } catch (err) {
                 document.getElementById('linkFinal').innerText = linkLongo;
                 document.getElementById('resultado').style.display = 'block';
-                alert("Erro ao encurtar, gerando link longo.");
             }
         }
 
         function copiarLink() {
-            const texto = document.getElementById('linkFinal').innerText;
-            navigator.clipboard.writeText(texto);
-            alert("Link copiado!");
+            navigator.clipboard.writeText(document.getElementById('linkFinal').innerText);
+            alert("Copiado com sucesso!");
         }
     </script>
 </body>
