@@ -7,118 +7,65 @@
     <style>
         #particles-js { position: fixed; width: 100%; height: 100%; background: #0b0e14; z-index: -1; top: 0; left: 0; }
         body { margin: 0; color: white; font-family: 'Segoe UI', Tahoma, sans-serif; text-align: center; }
-        
-        .box { 
-            background: rgba(22, 27, 34, 0.97); 
-            border: 1px solid #30363d; 
-            border-radius: 15px; 
-            width: 90%; max-width: 700px; 
-            margin: 40px auto; padding: 35px; 
-            position: relative; z-index: 1;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-        }
-
-        .info-bar { 
-            background: rgba(0, 0, 0, 0.6); 
-            border: 1px solid #444; 
-            border-radius: 12px; 
-            display: flex; align-items: center; 
-            padding: 20px; justify-content: space-between; 
-            text-align: left; margin-top: 20px;
-        }
-
-        .btn-dl { 
-            background: #21262d; color: #555; padding: 14px 25px; 
-            border-radius: 8px; text-decoration: none; font-weight: bold; 
-            pointer-events: none; border: 1px solid #333; transition: 0.3s;
-        }
-
-        .btn-dl.active { 
-            background: #007bff; color: white; 
-            pointer-events: auto; border: none; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
-        }
-
-        .btn-yt { background: #ff0000; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; display: inline-block; margin: 25px 0; font-weight: bold; font-size: 14px; box-shadow: 0 4px 15px rgba(255,0,0,0.3); }
-        
+        .box { background: rgba(22, 27, 34, 0.97); border: 1px solid #30363d; border-radius: 15px; width: 90%; max-width: 700px; margin: 40px auto; padding: 35px; position: relative; z-index: 1; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        .info-bar { background: rgba(0, 0, 0, 0.6); border: 1px solid #444; border-radius: 12px; display: flex; align-items: center; padding: 20px; justify-content: space-between; text-align: left; margin-top: 20px; }
+        .btn-dl { background: #21262d; color: #555; padding: 14px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; pointer-events: none; border: 1px solid #333; transition: 0.3s; }
+        .btn-dl.active { background: #007bff; color: white; pointer-events: auto; border: none; cursor: pointer; box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); }
+        .btn-yt { background: #ff0000; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; display: inline-block; margin: 25px 0; font-weight: bold; font-size: 14px; }
         iframe { width: 100%; height: 350px; border-radius: 12px; border: 1px solid #333; margin-top: 20px; }
         .status { color: #ffca28; font-weight: bold; font-size: 14px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-
     <div id="particles-js"></div>
-
     <div class="box">
-        <h1 id="t_titulo" style="color: #fff; font-size: 2.2rem; margin: 0;">Android Updates</h1>
-        <p style="color: #8b949e;">Versão Recente (Auto-Download)</p>
-
+        <h1 id="t_titulo">Android Updates</h1>
         <div class="info-bar">
             <div>
-                <span id="t_nome" style="font-weight: bold; font-size: 1.1rem; color: #58a6ff;">ficheiro.apk</span><br>
-                <small style="color: #8b949e;">Tamanho: <span id="t_tam">0 MB</span></small>
+                <span id="t_nome" style="font-weight:bold; color:#58a6ff;">arquivo.apk</span><br>
+                <small style="color:#8b949e;">Size: <span id="t_tam">0 MB</span></small>
             </div>
             <a href="#" id="mainDownload" class="btn-dl">BLOQUEADO</a>
         </div>
-
-        <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
-            <p class="status" id="statusMsg">⚠️ Primeiro: Inscreva-se para libertar o download</p>
+        <div style="margin-top:30px; border-top:1px solid #333; padding-top:20px;">
+            <p class="status" id="statusMsg">⚠️ Inscreva-se para liberar o download</p>
             <a href="#" id="ytLink" target="_blank" class="btn-yt">INSCREVER-SE NO CANAL</a>
-            
             <iframe id="videoPlayer" src="" allowfullscreen></iframe>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        const cfg = JSON.parse(localStorage.getItem('web_config'));
-
-        if (cfg) {
-            document.getElementById('t_titulo').innerText = cfg.titulo;
-            document.getElementById('t_nome').innerText = cfg.nome;
-            document.getElementById('t_tam').innerText = cfg.tamanho;
-            document.getElementById('videoPlayer').src = cfg.embed;
-            document.getElementById('ytLink').href = cfg.canal;
-            document.getElementById('mainDownload').href = cfg.link;
+        // Lógica para ler dados da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        if (urlParams.has('t')) {
+            document.getElementById('t_titulo').innerText = urlParams.get('t');
+            document.getElementById('t_nome').innerText = urlParams.get('n');
+            document.getElementById('t_tam').innerText = urlParams.get('s');
+            document.getElementById('mainDownload').href = urlParams.get('d');
+            document.getElementById('ytLink').href = urlParams.get('c');
+            document.getElementById('videoPlayer').src = `https://www.youtube.com/embed/${urlParams.get('v')}`;
         }
 
-        // Efeito Snow/Teia da Foto
         particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 100 },
-                "color": { "value": "#ff0000" }, // Pontos Vermelhos
-                "shape": { "type": "circle" },
-                "opacity": { "value": 0.6 },
-                "size": { "value": 2.5 },
-                "line_linked": { 
-                    "enable": true, 
-                    "distance": 130, 
-                    "color": "#ffffff", // Linhas Brancas
-                    "opacity": 0.25, 
-                    "width": 1 
-                },
-                "move": { "enable": true, "speed": 1.5 }
-            }
+            "particles": { "number": { "value": 100 }, "color": { "value": "#ff0000" }, "shape": { "type": "circle" }, "opacity": { "value": 0.6 }, "size": { "value": 2.5 }, "line_linked": { "enable": true, "distance": 130, "color": "#ffffff", "opacity": 0.25, "width": 1 }, "move": { "enable": true, "speed": 1.5 } }
         });
 
-        // Lógica do Contador e Libertação
         const btnYt = document.getElementById('ytLink');
         const btnDl = document.getElementById('mainDownload');
         const status = document.getElementById('statusMsg');
 
         btnYt.onclick = function() {
             let tempo = 5;
-            status.innerText = `⏳ Verificando em ${tempo}s... não feche o canal!`;
-            
             const contagem = setInterval(() => {
                 tempo--;
-                status.innerText = `⏳ Verificando em ${tempo}s... não feche o canal!`;
-                
+                status.innerText = `⏳ Aguarde ${tempo}s...`;
                 if(tempo <= 0) {
                     clearInterval(contagem);
                     btnDl.classList.add('active');
                     btnDl.innerText = "BAIXAR AGORA";
-                    status.innerText = "✅ DOWNLOAD LIBERTADO COM SUCESSO!";
+                    status.innerText = "✅ LIBERADO!";
                     status.style.color = "#39d353";
                 }
             }, 1000);
