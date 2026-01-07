@@ -3,63 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurador - Painel</title>
+    <title>Gerador de Links Únicos</title>
     <style>
         body { background-color: #0b0e14; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: #161b22; padding: 30px; border-radius: 12px; border: 1px solid #30363d; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { text-align: center; color: #58a6ff; margin-bottom: 20px; }
-        label { font-size: 13px; color: #8b949e; display: block; margin-top: 10px; }
-        input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
-        input:focus { border-color: #58a6ff; outline: none; }
-        button { width: 100%; padding: 15px; margin-top: 25px; border-radius: 6px; border: none; background: #238636; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
-        button:hover { background: #2ea043; }
+        .container { background: #161b22; padding: 30px; border-radius: 12px; border: 1px solid #30363d; width: 450px; }
+        h2 { text-align: center; color: #58a6ff; }
+        label { font-size: 12px; color: #8b949e; display: block; margin-top: 10px; }
+        input { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin-top: 20px; border-radius: 6px; border: none; background: #238636; color: white; font-weight: bold; cursor: pointer; }
+        #resultado { margin-top: 20px; display: none; padding: 15px; background: #0d1117; border: 1px dashed #58a6ff; border-radius: 6px; word-break: break-all; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Painel de Configuração</h2>
+        <h2>Criar Novo Link Único</h2>
         
-        <label>Título da Versão (ex: Delta V702)</label>
-        <input type="text" id="inputTitulo" placeholder="Introduza o título">
+        <label>Título (Ex: Delta V702)</label>
+        <input type="text" id="tit" placeholder="Título">
         
-        <label>Nome do Arquivo (ex: Delta_v2.apk)</label>
-        <input type="text" id="nomeArq" placeholder="Nome que aparecerá no download">
+        <label>Nome do Arquivo</label>
+        <input type="text" id="nom" placeholder="Ex: mod.apk">
         
-        <label>Tamanho do Arquivo (ex: 1.2 GB)</label>
-        <input type="text" id="tamArq" placeholder="Tamanho total">
+        <label>Tamanho</label>
+        <input type="text" id="tam" placeholder="Ex: 500 MB">
         
-        <label>Link Direto do Arquivo (Mediafire/Drive/etc)</label>
-        <input type="url" id="linkArq" placeholder="https://...">
+        <label>Link Direto do Arquivo (Download)</label>
+        <input type="url" id="l_d" placeholder="https://...">
 
-        <label>Link do Canal (Para inscrever)</label>
-        <input type="url" id="linkCanal" placeholder="https://youtube.com/@...">
+        <label>Link do Canal</label>
+        <input type="url" id="l_c" placeholder="https://youtube.com/@...">
 
-        <label>Link do Vídeo (Para aparecer no site)</label>
-        <input type="url" id="linkVideo" placeholder="https://www.youtube.com/watch?v=...">
+        <label>Link do Vídeo</label>
+        <input type="url" id="l_v" placeholder="Link do vídeo">
 
-        <button onclick="salvarConfig()">Gerar Site de Download</button>
+        <button onclick="gerarLinkCurto()">GERAR LINK PEQUENO</button>
+
+        <div id="resultado">
+            <label>Seu link gerado:</label>
+            <p id="linkFinal" style="color: #58a6ff; font-size: 14px;"></p>
+            <button onclick="copiarLink()" style="background: #1f6feb; padding: 8px; margin-top: 5px;">COPIAR LINK</button>
+        </div>
     </div>
 
     <script>
-        function salvarConfig() {
-            const formatar = (url) => url.startsWith('http') ? url : 'https://' + url;
+        async function gerarLinkCurto() {
+            const base = window.location.href.replace('index.html', 'concluir.html');
+            const params = new URLSearchParams({
+                t: document.getElementById('tit').value,
+                n: document.getElementById('nom').value,
+                s: document.getElementById('tam').value,
+                d: document.getElementById('l_d').value,
+                c: document.getElementById('l_c').value,
+                v: document.getElementById('l_v').value.split('v=')[1] || document.getElementById('l_v').value.split('/').pop()
+            });
 
-            const config = {
-                titulo: document.getElementById('inputTitulo').value,
-                nome: document.getElementById('nomeArq').value,
-                tamanho: document.getElementById('tamArq').value,
-                link: formatar(document.getElementById('linkArq').value),
-                canal: formatar(document.getElementById('linkCanal').value),
-                video: document.getElementById('linkVideo').value
-            };
+            const linkLongo = `${base}?${params.toString()}`;
+            
+            // Usando a API do TinyURL para encurtar o link automaticamente
+            try {
+                const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(linkLongo)}`);
+                const linkCurto = await res.text();
+                document.getElementById('linkFinal').innerText = linkCurto;
+                document.getElementById('resultado').style.display = 'block';
+            } catch (err) {
+                document.getElementById('linkFinal').innerText = linkLongo;
+                document.getElementById('resultado').style.display = 'block';
+                alert("Erro ao encurtar, gerando link longo.");
+            }
+        }
 
-            // Extrair ID do vídeo
-            let vid = config.video;
-            let id = vid.includes('v=') ? vid.split('v=')[1].split('&')[0] : vid.split('/').pop();
-            config.embed = `https://www.youtube.com/embed/${id}`;
-
-            localStorage.setItem('web_config', JSON.stringify(config));
-            window.location.href = "concluir.html";
+        function copiarLink() {
+            const texto = document.getElementById('linkFinal').innerText;
+            navigator.clipboard.writeText(texto);
+            alert("Link copiado!");
         }
     </script>
 </body>
