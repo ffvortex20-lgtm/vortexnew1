@@ -1,113 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Configurar Download</title>
-
-<style>
-body {
-  background: #0d1117;
-  color: white;
-  font-family: sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
-.box {
-  background: #161b22;
-  padding: 25px;
-  border-radius: 10px;
-  border: 1px solid #30363d;
-  width: 320px;
-}
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #30363d;
-  background: #0d1117;
-  color: white;
-}
-button {
-  width: 100%;
-  padding: 12px;
-  background: #238636;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Configurar Download</title>
+    <style>
+        body { background-color: #0b0e14; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: #161b22; padding: 30px; border-radius: 10px; border: 1px solid #30363d; width: 400px; }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: white; }
+        button { background: #238636; cursor: pointer; font-weight: bold; border: none; }
+        button:hover { background: #2ea043; }
+    </style>
 </head>
-
 <body>
+    <div class="container">
+        <h2>Configurar Atualização</h2>
+        <input type="text" id="inputTitulo" placeholder="Nome para o título (ex: Delta V702)">
+        <input type="file" id="inputFile" accept=".apk,.zip,.rar">
+        <button onclick="salvarDados()">Gerar Página de Download</button>
+    </div>
 
-<div class="box">
-  <h3>Configurar Página</h3>
+    <script>
+        function salvarDados() {
+            const titulo = document.getElementById('inputTitulo').value;
+            const arquivo = document.getElementById('inputFile').files[0];
 
-  <input type="text" id="title" placeholder="Título (Ex: Delta V702)">
-  <input type="text" id="fname" placeholder="Nome do arquivo (Ex: delta.apk)">
-  <input type="text" id="fsize" placeholder="Tamanho (Ex: 222 MB)">
+            if (!titulo || !arquivo) {
+                alert("Preencha o nome e selecione um arquivo!");
+                return;
+            }
 
-  <!-- 🔥 CAMPO DE ENVIO DO ARQUIVO (OBRIGATÓRIO) -->
-  <input type="file" id="file">
+            // Salva as informações no navegador
+            localStorage.setItem('nomeArquivo', arquivo.name);
+            localStorage.setItem('tamanhoArquivo', (arquivo.size / (1024 * 1024)).toFixed(2) + " MB");
+            localStorage.setItem('tituloPersonalizado', titulo);
+            localStorage.setItem('dataModificado', new Date().toLocaleDateString('pt-BR', { month: 'long', day: 'numeric', year: 'numeric' }));
 
-  <button onclick="gerar()">Ir para Página de Download</button>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-/* 🔥 SUA FIREBASE */
-const firebaseConfig = {
-  apiKey: "AIzaSyAx-jIvw9lqykjroKMWzRTEOlZ41Xk6-bY",
-  databaseURL: "https://vortexxxxxxxxx-5159f-default-rtdb.firebaseio.com",
-  projectId: "vortexxxxxxxxx-5159f",
-  storageBucket: "vortexxxxxxxxx-5159f.firebasestorage.app"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
-
-window.gerar = async () => {
-  const title = document.getElementById("title").value || "Android Update";
-  const fsize = document.getElementById("fsize").value || "0 MB";
-
-  const fileInput = document.getElementById("file");
-  if (!fileInput.files.length) {
-    alert("Selecione um arquivo");
-    return;
-  }
-
-  const file = fileInput.files[0];
-
-  /* 🔥 UPLOAD PARA O STORAGE */
-  const storageRef = sRef(storage, "files/" + Date.now() + "_" + file.name);
-  await uploadBytes(storageRef, file);
-  const fileURL = await getDownloadURL(storageRef);
-
-  /* 🔥 SALVA NO REALTIME */
-  const linkRef = push(ref(db, "links"));
-  await set(linkRef, {
-    title: title,
-    name: file.name,
-    size: fsize,
-    url: fileURL,
-    clicks: 0,
-    createdAt: Date.now()
-  });
-
-  /* 🔥 REDIRECIONA */
-  window.location.href = "concluir.html?id=" + linkRef.key;
-};
-</script>
-
+            // Redireciona para a página de conclusão
+            window.location.href = "concluir.html";
+        }
+    </script>
 </body>
 </html>
