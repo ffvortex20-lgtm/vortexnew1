@@ -4,18 +4,29 @@
     <meta charset="UTF-8">
     <title>Configurar Download</title>
     <style>
-        body { background-color: #0b0e14; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: #161b22; padding: 30px; border-radius: 10px; border: 1px solid #30363d; width: 400px; }
-        input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: white; }
-        button { background: #238636; cursor: pointer; font-weight: bold; border: none; }
+        body { background-color: #0b0e14; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: #161b22; padding: 30px; border-radius: 10px; border: 1px solid #30363d; width: 450px; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
+        button { background: #238636; cursor: pointer; font-weight: bold; border: none; margin-top: 20px; }
         button:hover { background: #2ea043; }
+        label { font-size: 0.9rem; color: #8b949e; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Configurar Atualização</h2>
-        <input type="text" id="inputTitulo" placeholder="Nome para o título (ex: Delta V702)">
-        <input type="file" id="inputFile" accept=".apk,.zip,.rar">
+        <h2>Configurar Página</h2>
+        <label>Título da Versão:</label>
+        <input type="text" id="inputTitulo" placeholder="Ex: Delta V702">
+        
+        <label>Arquivo APK:</label>
+        <input type="file" id="inputFile">
+        
+        <label>Link do Canal (Para liberar download):</label>
+        <input type="url" id="linkCanal" placeholder="https://youtube.com/@seucanal">
+        
+        <label>Link do Vídeo (YouTube):</label>
+        <input type="url" id="linkVideo" placeholder="https://www.youtube.com/watch?v=XXXXX">
+        
         <button onclick="salvarDados()">Gerar Página de Download</button>
     </div>
 
@@ -23,19 +34,25 @@
         function salvarDados() {
             const titulo = document.getElementById('inputTitulo').value;
             const arquivo = document.getElementById('inputFile').files[0];
+            const canal = document.getElementById('linkCanal').value;
+            const video = document.getElementById('linkVideo').value;
 
-            if (!titulo || !arquivo) {
-                alert("Preencha o nome e selecione um arquivo!");
+            if (!titulo || !arquivo || !canal || !video) {
+                alert("Por favor, preencha todos os campos!");
                 return;
             }
 
-            // Salva as informações no navegador
+            // Converter link comum do YouTube para link de Embed (incorporado)
+            let videoID = video.split('v=')[1] || video.split('/').pop();
+            let embedUrl = `https://www.youtube.com/embed/${videoID}`;
+
             localStorage.setItem('nomeArquivo', arquivo.name);
             localStorage.setItem('tamanhoArquivo', (arquivo.size / (1024 * 1024)).toFixed(2) + " MB");
             localStorage.setItem('tituloPersonalizado', titulo);
-            localStorage.setItem('dataModificado', new Date().toLocaleDateString('pt-BR', { month: 'long', day: 'numeric', year: 'numeric' }));
+            localStorage.setItem('linkCanal', canal);
+            localStorage.setItem('linkVideo', embedUrl);
+            localStorage.setItem('dataModificado', new Date().toLocaleDateString('pt-BR'));
 
-            // Redireciona para a página de conclusão
             window.location.href = "concluir.html";
         }
     </script>
