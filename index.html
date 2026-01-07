@@ -8,52 +8,42 @@
         .container { background: #161b22; padding: 30px; border-radius: 10px; border: 1px solid #30363d; width: 450px; }
         input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
         button { background: #238636; cursor: pointer; font-weight: bold; border: none; margin-top: 20px; }
-        button:hover { background: #2ea043; }
-        label { font-size: 0.9rem; color: #8b949e; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Configurar Página</h2>
-        <label>Título da Versão:</label>
-        <input type="text" id="inputTitulo" placeholder="Ex: Delta V702">
-        
-        <label>Arquivo APK:</label>
+        <h2>Configurar Download</h2>
+        <input type="text" id="inputTitulo" placeholder="Título (Ex: Delta V702)">
         <input type="file" id="inputFile">
-        
-        <label>Link do Canal (Para liberar download):</label>
-        <input type="url" id="linkCanal" placeholder="https://youtube.com/@seucanal">
-        
-        <label>Link do Vídeo (YouTube):</label>
-        <input type="url" id="linkVideo" placeholder="https://www.youtube.com/watch?v=XXXXX">
-        
-        <button onclick="salvarDados()">Gerar Página de Download</button>
+        <input type="url" id="linkCanal" placeholder="Link do Canal (Ex: https://youtube.com/@nome)">
+        <input type="url" id="linkVideo" placeholder="Link do Vídeo do YouTube">
+        <button onclick="salvarEDisparar()">Gerar e Salvar</button>
     </div>
 
     <script>
-        function salvarDados() {
-            const titulo = document.getElementById('inputTitulo').value;
+        function salvarEDisparar() {
             const arquivo = document.getElementById('inputFile').files[0];
+            const titulo = document.getElementById('inputTitulo').value;
             const canal = document.getElementById('linkCanal').value;
             const video = document.getElementById('linkVideo').value;
 
-            if (!titulo || !arquivo || !canal || !video) {
-                alert("Por favor, preencha todos os campos!");
-                return;
-            }
+            if (!arquivo) return alert("Selecione o arquivo!");
 
-            // Converter link comum do YouTube para link de Embed (incorporado)
-            let videoID = video.split('v=')[1] || video.split('/').pop();
-            let embedUrl = `https://www.youtube.com/embed/${videoID}`;
+            // Converter o arquivo em um link temporário para download
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                localStorage.setItem('arquivoData', e.target.result); // Base64 do arquivo
+                localStorage.setItem('nomeArquivo', arquivo.name);
+                localStorage.setItem('tamanhoArquivo', (arquivo.size / (1024 * 1024)).toFixed(2) + " MB");
+                localStorage.setItem('tituloPersonalizado', titulo);
+                localStorage.setItem('linkCanal', canal);
+                
+                let videoID = video.split('v=')[1] || video.split('/').pop();
+                localStorage.setItem('linkVideo', `https://www.youtube.com/embed/${videoID}`);
 
-            localStorage.setItem('nomeArquivo', arquivo.name);
-            localStorage.setItem('tamanhoArquivo', (arquivo.size / (1024 * 1024)).toFixed(2) + " MB");
-            localStorage.setItem('tituloPersonalizado', titulo);
-            localStorage.setItem('linkCanal', canal);
-            localStorage.setItem('linkVideo', embedUrl);
-            localStorage.setItem('dataModificado', new Date().toLocaleDateString('pt-BR'));
-
-            window.location.href = "concluir.html";
+                window.location.href = "concluir.html";
+            };
+            reader.readAsDataURL(arquivo);
         }
     </script>
 </body>
