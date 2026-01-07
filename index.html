@@ -2,48 +2,64 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Configurar Download</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurador - Painel</title>
     <style>
-        body { background-color: #0b0e14; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: #161b22; padding: 30px; border-radius: 10px; border: 1px solid #30363d; width: 450px; }
-        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
-        button { background: #238636; cursor: pointer; font-weight: bold; border: none; margin-top: 20px; }
+        body { background-color: #0b0e14; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: #161b22; padding: 30px; border-radius: 12px; border: 1px solid #30363d; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { text-align: center; color: #58a6ff; margin-bottom: 20px; }
+        label { font-size: 13px; color: #8b949e; display: block; margin-top: 10px; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; box-sizing: border-box; }
+        input:focus { border-color: #58a6ff; outline: none; }
+        button { width: 100%; padding: 15px; margin-top: 25px; border-radius: 6px; border: none; background: #238636; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
+        button:hover { background: #2ea043; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Configurar Download</h2>
-        <input type="text" id="inputTitulo" placeholder="Título (Ex: Delta V702)">
-        <input type="file" id="inputFile">
-        <input type="url" id="linkCanal" placeholder="Link do Canal (Ex: https://youtube.com/@nome)">
-        <input type="url" id="linkVideo" placeholder="Link do Vídeo do YouTube">
-        <button onclick="salvarEDisparar()">Gerar e Salvar</button>
+        <h2>Painel de Configuração</h2>
+        
+        <label>Título da Versão (ex: Delta V702)</label>
+        <input type="text" id="inputTitulo" placeholder="Introduza o título">
+        
+        <label>Nome do Arquivo (ex: Delta_v2.apk)</label>
+        <input type="text" id="nomeArq" placeholder="Nome que aparecerá no download">
+        
+        <label>Tamanho do Arquivo (ex: 1.2 GB)</label>
+        <input type="text" id="tamArq" placeholder="Tamanho total">
+        
+        <label>Link Direto do Arquivo (Mediafire/Drive/etc)</label>
+        <input type="url" id="linkArq" placeholder="https://...">
+
+        <label>Link do Canal (Para inscrever)</label>
+        <input type="url" id="linkCanal" placeholder="https://youtube.com/@...">
+
+        <label>Link do Vídeo (Para aparecer no site)</label>
+        <input type="url" id="linkVideo" placeholder="https://www.youtube.com/watch?v=...">
+
+        <button onclick="salvarConfig()">Gerar Site de Download</button>
     </div>
 
     <script>
-        function salvarEDisparar() {
-            const arquivo = document.getElementById('inputFile').files[0];
-            const titulo = document.getElementById('inputTitulo').value;
-            const canal = document.getElementById('linkCanal').value;
-            const video = document.getElementById('linkVideo').value;
+        function salvarConfig() {
+            const formatar = (url) => url.startsWith('http') ? url : 'https://' + url;
 
-            if (!arquivo) return alert("Selecione o arquivo!");
-
-            // Converter o arquivo em um link temporário para download
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                localStorage.setItem('arquivoData', e.target.result); // Base64 do arquivo
-                localStorage.setItem('nomeArquivo', arquivo.name);
-                localStorage.setItem('tamanhoArquivo', (arquivo.size / (1024 * 1024)).toFixed(2) + " MB");
-                localStorage.setItem('tituloPersonalizado', titulo);
-                localStorage.setItem('linkCanal', canal);
-                
-                let videoID = video.split('v=')[1] || video.split('/').pop();
-                localStorage.setItem('linkVideo', `https://www.youtube.com/embed/${videoID}`);
-
-                window.location.href = "concluir.html";
+            const config = {
+                titulo: document.getElementById('inputTitulo').value,
+                nome: document.getElementById('nomeArq').value,
+                tamanho: document.getElementById('tamArq').value,
+                link: formatar(document.getElementById('linkArq').value),
+                canal: formatar(document.getElementById('linkCanal').value),
+                video: document.getElementById('linkVideo').value
             };
-            reader.readAsDataURL(arquivo);
+
+            // Extrair ID do vídeo
+            let vid = config.video;
+            let id = vid.includes('v=') ? vid.split('v=')[1].split('&')[0] : vid.split('/').pop();
+            config.embed = `https://www.youtube.com/embed/${id}`;
+
+            localStorage.setItem('web_config', JSON.stringify(config));
+            window.location.href = "concluir.html";
         }
     </script>
 </body>
