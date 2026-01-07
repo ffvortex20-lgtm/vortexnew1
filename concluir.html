@@ -22,29 +22,29 @@
         <h1 id="t_titulo">Android Updates</h1>
         <div class="info-bar">
             <div>
-                <span id="t_nome" style="font-weight:bold; color:#58a6ff;">ficheiro.apk</span><br>
-                <small style="color:#8b949e;">Size: <span id="t_tam">0 MB</span></small>
+                <span id="t_nome" style="font-weight:bold; color:#58a6ff;">carregando...</span><br>
+                <small style="color:#8b949e;">Tamanho: <span id="t_tam">...</span></small>
             </div>
             <a href="#" id="mainDownload" class="btn-dl">BLOQUEADO</a>
         </div>
         <div style="margin-top:30px; border-top:1px solid #333; padding-top:20px;">
-            <p class="status" id="statusMsg">⚠️ Clique abaixo para liberar o download</p>
-            <a href="#" id="ytLink" target="_blank" class="btn-yt">INSCREVER-SE NO CANAL</a>
+            <p class="status" id="statusMsg">⚠️ Clique no botão abaixo para liberar</p>
+            <a href="#" id="ytLink" target="_blank" class="btn-yt">CLIQUE AQUI PARA LIBERAR</a>
             <iframe id="videoPlayer" src="" allowfullscreen></iframe>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
+        // Captura e Decodifica os parâmetros da URL
         const urlParams = new URLSearchParams(window.location.search);
         
-        // Aplica os dados da URL imediatamente
         if (urlParams.has('t')) {
-            document.getElementById('t_titulo').innerText = urlParams.get('t');
-            document.getElementById('t_nome').innerText = urlParams.get('n');
-            document.getElementById('t_tam').innerText = urlParams.get('s');
-            document.getElementById('mainDownload').href = urlParams.get('d');
-            document.getElementById('ytLink').href = urlParams.get('c');
+            document.getElementById('t_titulo').innerText = decodeURIComponent(urlParams.get('t'));
+            document.getElementById('t_nome').innerText = decodeURIComponent(urlParams.get('n'));
+            document.getElementById('t_tam').innerText = decodeURIComponent(urlParams.get('s'));
+            document.getElementById('mainDownload').href = decodeURIComponent(urlParams.get('d'));
+            document.getElementById('ytLink').href = decodeURIComponent(urlParams.get('c'));
             document.getElementById('videoPlayer').src = `https://www.youtube.com/embed/${urlParams.get('v')}`;
         }
 
@@ -65,7 +65,7 @@
                     clearInterval(contagem);
                     btnDl.classList.add('active');
                     btnDl.innerText = "BAIXAR AGORA";
-                    status.innerText = "✅ LIBERADO!";
+                    status.innerText = "✅ LIBERADO COM SUCESSO!";
                     status.style.color = "#39d353";
                 }
             }, 1000);
