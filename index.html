@@ -18,30 +18,25 @@
 </head>
 <body>
     <div class="container">
-        <h2>Gerar Link Direto</h2>
+        <h2>Gerar Link de Download</h2>
         
         <label>Título da Versão</label>
         <input type="text" id="tit" placeholder="Ex: Delta V702">
-        
         <label>Nome do Arquivo</label>
         <input type="text" id="nom" placeholder="Ex: delta_v2.apk">
-        
         <label>Tamanho</label>
         <input type="text" id="tam" placeholder="Ex: 1.5 GB">
-        
         <label>Link de Download (2GB+)</label>
         <input type="url" id="l_d" placeholder="https://mediafire.com/...">
-
         <label>Link do Canal</label>
         <input type="url" id="l_c" placeholder="https://youtube.com/@seu_canal">
-
         <label>Link do Vídeo</label>
         <input type="url" id="l_v" placeholder="Link do vídeo do YT">
 
         <button onclick="gerarLinkCurto()">GERAR LINK PARA DOWNLOAD</button>
 
         <div id="resultado">
-            <label>Link Gerado (Vai para Concluir):</label>
+            <label>Link para seus usuários:</label>
             <strong id="linkFinal"></strong>
             <button onclick="copiarLink()" style="background: #1f6feb;">COPIAR LINK</button>
         </div>
@@ -49,45 +44,39 @@
 
     <script>
         async function gerarLinkCurto() {
-            // Garante que o link aponte para concluir.html independente de onde você esteja
+            // Garante que o link de destino seja concluir.html
             let urlAtual = window.location.href.split('?')[0];
             let pastaBase = urlAtual.substring(0, urlAtual.lastIndexOf('/') + 1);
             let linkConcluir = pastaBase + "concluir.html";
+
+            // Função para garantir que o link comece com http (evita o erro 404)
+            const validarLink = (url) => url.startsWith('http') ? url : 'https://' + url;
 
             const params = new URLSearchParams({
                 t: document.getElementById('tit').value,
                 n: document.getElementById('nom').value,
                 s: document.getElementById('tam').value,
-                d: document.getElementById('l_d').value,
-                c: document.getElementById('l_c').value,
+                d: validarLink(document.getElementById('l_d').value),
+                c: validarLink(document.getElementById('l_c').value),
                 v: document.getElementById('l_v').value.split('v=')[1] || document.getElementById('l_v').value.split('/').pop()
             });
 
-            const linkLongoComDados = `${linkConcluir}?${params.toString()}`;
+            const linkLongo = `${linkConcluir}?${params.toString()}`;
             
             try {
-                // Chama o encurtador passando o link da página CONCLUIR
-                const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(linkLongoComDados)}`);
+                const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(linkLongo)}`);
                 const linkCurto = await res.text();
-                
-                if(linkCurto.startsWith("http")) {
-                    document.getElementById('linkFinal').innerText = linkCurto;
-                } else {
-                    document.getElementById('linkFinal').innerText = linkLongoComDados;
-                }
-                
+                document.getElementById('linkFinal').innerText = linkCurto;
                 document.getElementById('resultado').style.display = 'block';
             } catch (err) {
-                // Se o encurtador falhar, mostra o link longo (que já aponta para concluir.html)
-                document.getElementById('linkFinal').innerText = linkLongoComDados;
+                document.getElementById('linkFinal').innerText = linkLongo;
                 document.getElementById('resultado').style.display = 'block';
             }
         }
 
         function copiarLink() {
-            const texto = document.getElementById('linkFinal').innerText;
-            navigator.clipboard.writeText(texto);
-            alert("Link copiado! Pode divulgar.");
+            navigator.clipboard.writeText(document.getElementById('linkFinal').innerText);
+            alert("Link copiado!");
         }
     </script>
 </body>
