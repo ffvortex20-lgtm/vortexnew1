@@ -2,146 +2,106 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Android Updates - Download</title>
+    <title>Android Updates</title>
     <style>
-        /* Fundo e Partículas */
-        #particles-js {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background-color: #0b0e14; /* Cor de fundo igual à imagem */
-            z-index: -1;
-            top: 0;
-            left: 0;
-        }
-
-        body { 
-            margin: 0; 
-            color: white; 
-            font-family: sans-serif; 
-            text-align: center; 
-            padding-bottom: 50px; 
-        }
-
-        .header { padding: 40px 0; }
-        
+        #particles-js { position: fixed; width: 100%; height: 100%; background: #0b0e14; z-index: -1; top: 0; left: 0; }
+        body { margin: 0; color: white; font-family: sans-serif; text-align: center; }
         .download-box { 
-            background: rgba(22, 27, 34, 0.9); /* Leve transparência para ver as partículas */
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 15px; 
-            width: 90%; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 30px;
-            position: relative;
-            z-index: 1;
+            background: rgba(22, 27, 34, 0.95); 
+            border: 1px solid #30363d; 
+            border-radius: 12px; 
+            width: 85%; max-width: 700px; 
+            margin: 50px auto; padding: 30px; 
+            position: relative; z-index: 1;
         }
-        
         .file-info-bar { 
-            background: rgba(0, 0, 0, 0.5); 
+            background: rgba(0, 0, 0, 0.6); 
+            border: 1px solid #444; 
             border-radius: 10px; 
-            display: flex; 
-            align-items: center; 
-            padding: 20px; 
-            justify-content: space-between; 
-            margin-bottom: 20px; 
+            display: flex; align-items: center; 
+            padding: 15px; justify-content: space-between; 
         }
-
         .btn-download { 
-            background: #333; 
-            color: #888; 
-            padding: 12px 25px; 
-            border-radius: 8px; 
-            text-decoration: none; 
-            font-weight: bold; 
-            cursor: not-allowed; 
-            pointer-events: none; 
-            transition: 0.3s;
+            background: #21262d; color: #444; padding: 12px 25px; 
+            border-radius: 6px; text-decoration: none; font-weight: bold; 
+            pointer-events: none; border: 1px solid #333;
         }
-
         .btn-download.active { 
-            background: #007bff; 
-            color: white; 
-            cursor: pointer; 
-            pointer-events: auto; 
-            box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
+            background: #007bff; color: white; 
+            pointer-events: auto; border: none; cursor: pointer;
         }
-
-        .unlock-section { margin-top: 30px; padding: 20px; border-top: 1px solid #333; }
-        .btn-canal { background: #ff0000; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-bottom: 20px; font-weight: bold; }
-        
-        iframe { width: 100%; max-width: 500px; height: 280px; border-radius: 10px; border: none; margin-top: 20px; }
-        
-        .msg-trava { color: #ffca28; font-size: 0.9rem; margin-bottom: 10px; font-weight: bold; }
+        .btn-canal { background: #ff0000; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; font-weight: bold; }
+        iframe { width: 100%; height: 300px; border-radius: 8px; border: none; margin-top: 15px; }
     </style>
 </head>
 <body>
 
     <div id="particles-js"></div>
 
-    <div class="header">
-        <h1>Android Updates</h1>
-    </div>
-
     <div class="download-box">
         <h2 id="displayTitulo">Latest Version</h2>
-        
         <div class="file-info-bar">
             <div style="text-align: left;">
-                <strong id="displayNome">carregando...</strong><br>
-                <small style="color: #8b949e;">Size: <span id="displayTamanho">0MB</span></small>
+                <span id="displayNome" style="font-weight: bold;">nome.apk</span><br>
+                <small style="color: #8b949e;">Tamanho: <span id="displayTamanho">0MB</span></small>
             </div>
-            <a href="#" class="btn-download" id="btnDownload">Bloqueado</a>
+            <a id="btnDownload" class="btn-download" download>Download</a>
         </div>
 
-        <div class="unlock-section">
-            <p class="msg-trava" id="msgStatus">⚠️ Inscreva-se para liberar o botão de download</p>
-            <a href="#" target="_blank" class="btn-canal" id="linkCanalBtn">1. IR PARA O CANAL</a>
-            
-            <div>
-                <iframe id="videoPlayer" src="" allowfullscreen></iframe>
-            </div>
+        <div style="margin-top: 20px; border-top: 1px solid #333;">
+            <p style="color: #ffca28;">1. Clique no botão para abrir o canal e liberar:</p>
+            <a href="#" id="linkCanalBtn" class="btn-canal">INSCREVER-SE NO CANAL</a>
+            <iframe id="videoPlayer" src=""></iframe>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // Configuração das Partículas (Bolinhas Vermelhas e Linhas Brancas)
+        // Configuração Particles Estilo Snow/Teia da foto
         particlesJS("particles-js", {
             "particles": {
-                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                "number": { "value": 100 },
                 "color": { "value": "#ff0000" }, // Bolinhas Vermelhas
                 "shape": { "type": "circle" },
                 "opacity": { "value": 0.5 },
-                "size": { "value": 3, "random": true },
+                "size": { "value": 2 },
                 "line_linked": { 
                     "enable": true, 
-                    "distance": 150, 
-                    "color": "#ffffff", // Linhas Brancas
-                    "opacity": 0.4, 
+                    "distance": 120, 
+                    "color": "#ffffff", // Linhas Brancas finas
+                    "opacity": 0.2, 
                     "width": 1 
                 },
-                "move": { "enable": true, "speed": 2 }
+                "move": { "enable": true, "speed": 1 }
             }
         });
 
-        // Lógica de Dados e Trava
-        document.getElementById('displayNome').innerText = localStorage.getItem('nomeArquivo') || "arquivo.apk";
-        document.getElementById('displayTamanho').innerText = localStorage.getItem('tamanhoArquivo') || "0MB";
-        document.getElementById('displayTitulo').innerText = localStorage.getItem('tituloPersonalizado') || "Download";
+        // Recuperar e aplicar dados
+        const fileData = localStorage.getItem('arquivoData');
+        const fileName = localStorage.getItem('nomeArquivo');
+        const canalLink = localStorage.getItem('linkCanal');
+
+        document.getElementById('displayNome').innerText = fileName;
+        document.getElementById('displayTamanho').innerText = localStorage.getItem('tamanhoArquivo');
+        document.getElementById('displayTitulo').innerText = localStorage.getItem('tituloPersonalizado');
         document.getElementById('videoPlayer').src = localStorage.getItem('linkVideo');
-        document.getElementById('linkCanalBtn').href = localStorage.getItem('linkCanal');
+        
+        // Link do Canal
+        document.getElementById('linkCanalBtn').href = canalLink;
 
-        const btnCanal = document.getElementById('linkCanalBtn');
         const btnDownload = document.getElementById('btnDownload');
+        const btnCanal = document.getElementById('linkCanalBtn');
 
+        // Configura o link de download direto
+        btnDownload.href = fileData;
+        btnDownload.download = fileName;
+
+        // Liberar download após clicar no canal
         btnCanal.onclick = function() {
             setTimeout(() => {
                 btnDownload.classList.add('active');
-                btnDownload.innerText = "DOWNLOAD AGORA";
-                document.getElementById('msgStatus').innerHTML = "✅ Download Liberado!";
-                document.getElementById('msgStatus').style.color = "#00ff00";
-            }, 3000); // 3 segundos para liberar
+                btnDownload.innerText = "BAIXAR ARQUIVO";
+            }, 2500); 
         };
     </script>
 </body>
