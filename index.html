@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Gerador</title>
+    <title>Painel Gerador de Links</title>
     <style>
         body { background-color: #0b0e14; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .container { background: #161b22; padding: 30px; border-radius: 12px; border: 1px solid #30363d; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -18,7 +18,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Gerar Link de Download</h2>
+        <h2>Gerar Link Direto</h2>
         
         <label>Título da Versão</label>
         <input type="text" id="tit" placeholder="Ex: Delta V702">
@@ -38,10 +38,10 @@
         <label>Link do Vídeo</label>
         <input type="url" id="l_v" placeholder="Link do vídeo do YT">
 
-        <button onclick="gerarLinkCurto()">GERAR LINK ÚNICO</button>
+        <button onclick="gerarLinkCurto()">GERAR LINK PARA DOWNLOAD</button>
 
         <div id="resultado">
-            <label>Link para seus usuários:</label>
+            <label>Link Gerado (Vai para Concluir):</label>
             <strong id="linkFinal"></strong>
             <button onclick="copiarLink()" style="background: #1f6feb;">COPIAR LINK</button>
         </div>
@@ -49,15 +49,10 @@
 
     <script>
         async function gerarLinkCurto() {
-            // Pega a URL atual e troca index.html por concluir.html
-            let base = window.location.href.split('?')[0];
-            if (base.endsWith('index.html')) {
-                base = base.replace('index.html', 'concluir.html');
-            } else if (base.endsWith('/')) {
-                base = base + 'concluir.html';
-            } else {
-                base = base.substring(0, base.lastIndexOf('/') + 1) + 'concluir.html';
-            }
+            // Garante que o link aponte para concluir.html independente de onde você esteja
+            let urlAtual = window.location.href.split('?')[0];
+            let pastaBase = urlAtual.substring(0, urlAtual.lastIndexOf('/') + 1);
+            let linkConcluir = pastaBase + "concluir.html";
 
             const params = new URLSearchParams({
                 t: document.getElementById('tit').value,
@@ -68,22 +63,31 @@
                 v: document.getElementById('l_v').value.split('v=')[1] || document.getElementById('l_v').value.split('/').pop()
             });
 
-            const linkLongo = `${base}?${params.toString()}`;
+            const linkLongoComDados = `${linkConcluir}?${params.toString()}`;
             
             try {
-                const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(linkLongo)}`);
+                // Chama o encurtador passando o link da página CONCLUIR
+                const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(linkLongoComDados)}`);
                 const linkCurto = await res.text();
-                document.getElementById('linkFinal').innerText = linkCurto;
+                
+                if(linkCurto.startsWith("http")) {
+                    document.getElementById('linkFinal').innerText = linkCurto;
+                } else {
+                    document.getElementById('linkFinal').innerText = linkLongoComDados;
+                }
+                
                 document.getElementById('resultado').style.display = 'block';
             } catch (err) {
-                document.getElementById('linkFinal').innerText = linkLongo;
+                // Se o encurtador falhar, mostra o link longo (que já aponta para concluir.html)
+                document.getElementById('linkFinal').innerText = linkLongoComDados;
                 document.getElementById('resultado').style.display = 'block';
             }
         }
 
         function copiarLink() {
-            navigator.clipboard.writeText(document.getElementById('linkFinal').innerText);
-            alert("Copiado com sucesso!");
+            const texto = document.getElementById('linkFinal').innerText;
+            navigator.clipboard.writeText(texto);
+            alert("Link copiado! Pode divulgar.");
         }
     </script>
 </body>
